@@ -3,3 +3,7 @@ obj/
 /packages/
 riderModule.iml
 /_ReSharper.Caches/
+
+# Ignore configuration files with sensitive data
+appsettings.json
+appsettings.Development.json
