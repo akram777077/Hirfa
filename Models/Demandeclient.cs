@@ -1,0 +1,33 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace Hirfa.Web.Models;
+
+public partial class Demandeclient
+{
+    public int Iddemandeclient { get; set; }
+
+    public DateOnly Datedemande { get; set; }
+
+    public DateOnly? Datedebut { get; set; }
+
+    public DateOnly? Datefin { get; set; }
+
+    public string Etat { get; set; } = null!;
+
+    public string? Description { get; set; }
+
+    public string Categorie { get; set; } = null!;
+
+    public int Idclient { get; set; }
+
+    public int? Idprestataire { get; set; }
+
+    public virtual ICollection<Devi> Devis { get; set; } = new List<Devi>();
+
+    public virtual Facture? Facture { get; set; }
+
+    public virtual Client IdclientNavigation { get; set; } = null!;
+
+    public virtual Prestataire? IdprestataireNavigation { get; set; }
+}

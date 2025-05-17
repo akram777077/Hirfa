@@ -1,7 +1,14 @@
+using Hirfa.Web.Data;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Register HirfaDbContext with connection string from configuration
+builder.Services.AddDbContext<HirfaDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("HirfaDb")));
 
 var app = builder.Build();
 
@@ -24,6 +31,5 @@ app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-
 
 app.Run();
