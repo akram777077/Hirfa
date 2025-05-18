@@ -1,8 +1,35 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="hero-section d-flex align-items-center justify-content-center" style="min-height: 80vh; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); color: #fff;">
+    <div class="text-center">
+        <h1 class="display-3 fw-bold mb-4">Welcome to Hirfa Service Platform</h1>
+        <p class="lead mb-5">Find, request, and manage services with ease. Join as a client, service provider, or admin.</p>
+        <a asp-controller="Account" asp-action="Login" class="btn btn-light btn-lg me-3 px-5 py-2">Login</a>
+        <div class="dropdown d-inline-block">
+            <button class="btn btn-outline-light btn-lg px-5 py-2 dropdown-toggle" type="button" id="signupDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                Sign Up
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="signupDropdown">
+                <li><a class="dropdown-item" asp-controller="Account" asp-action="RegisterClient">Sign Up as Client</a></li>
+                <li><a class="dropdown-item" asp-controller="Account" asp-action="RegisterServiceClient">Sign Up as Service Client</a></li>
+                <li><a class="dropdown-item" asp-controller="Account" asp-action="RegisterAdmin">Sign Up as Admin</a></li>
+                <li><a class="dropdown-item" asp-controller="Account" asp-action="RegisterPrestataire">Sign Up as Prestataire</a></li>
+            </ul>
+        </div>
+        @if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            <a asp-controller="Account" asp-action="Logout" class="btn btn-danger btn-lg px-5 py-2 ms-3">Logout</a>
+        }
+    </div>
 </div>
+
+<style>
+.hero-section {
+    background-image: url('/wwwroot/img/hero-bg.svg');
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}
+</style>

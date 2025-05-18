@@ -1,0 +1,347 @@
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Hirfa.Web.Models;
+using Hirfa.Web.Data;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.IO;
+using Microsoft.AspNetCore.Http;
+using Hirfa.Web.ViewModels;
+
+namespace Hirfa.Web.Controllers
+{
+    public class AccountController : Controller
+    {
+        private readonly HirfaDbContext _context;
+        public AccountController(HirfaDbContext context)
+        {
+            _context = context;
+        }
+
+        [HttpGet]
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Login(string email, string password)
+        {
+            var compte = _context.Comptes.FirstOrDefault(c => c.Email == email && c.Motdepasse == password);
+            if (compte == null)
+            {
+                TempData["ErrorToast"] = "Invalid email or password.";
+                return View();
+            }
+            // Prestataire login restriction
+            if (_context.Prestataires.Any(p => p.Idcompte == compte.Idcompte))
+            {
+                var prestataire = _context.Prestataires.FirstOrDefault(p => p.Idcompte == compte.Idcompte);
+                if (prestataire != null && !prestataire.Estdisponible)
+                {
+                    TempData["ErrorToast"] = "Your account is not yet approved or is inactive.";
+                    return View();
+                }
+                return RedirectToAction("PrestataireDashboard");
+            }
+            if (_context.Admins.Any(a => a.Idcompte == compte.Idcompte))
+                return RedirectToAction("AdminDashboard");
+            if (_context.Clients.Any(c => c.Idcompte == compte.Idcompte))
+                return RedirectToAction("ClientDashboard");
+            if (_context.Serviceclients.Any(s => s.Idcompte == compte.Idcompte))
+                return RedirectToAction("ServiceClientDashboard");
+            if (_context.Demandeprestataires.Any(d => d.Email == compte.Email && d.Etat == "pending"))
+            {
+                TempData["ErrorToast"] = "Your account is pending approval. You will be able to log in once approved.";
+                return View();
+            }
+            TempData["ErrorToast"] = "No role assigned to this account.";
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult Register()
+        {
+            // Redirect to the new prestataire demand registration view
+            return RedirectToAction("RegisterPrestataire");
+        }
+
+        [HttpGet]
+        public IActionResult RegisterAdmin() => View("RegisterAdmin");
+        [HttpGet]
+        public IActionResult RegisterClient() => View("RegisterClient");
+        [HttpGet]
+        public IActionResult RegisterServiceClient() => View("RegisterServiceClient");
+        [HttpGet]
+        public IActionResult RegisterPrestataire() => View("RegisterPrestataireDemande"); // Prestataire demand registration
+        [HttpGet]
+        public IActionResult RegisterPrestataireDemande() => View("RegisterPrestataireDemande");
+
+        [HttpPost]
+        public async Task<IActionResult> Register(string role, AdminRegisterViewModel adminModel, ClientRegisterViewModel clientModel, ServiceClientRegisterViewModel serviceClientModel, PrestataireDemandeViewModel prestataireModel)
+        {
+            if (role == "admin")
+            {
+                // Remove validation errors for fields not in AdminRegisterViewModel
+                var allowedKeys = new HashSet<string> {
+                    nameof(adminModel.Email),
+                    nameof(adminModel.Password),
+                    "role"
+                };
+                var keysToRemove = ModelState.Keys.Where(k => !allowedKeys.Contains(k) && !k.StartsWith("adminModel.")).ToList();
+                foreach (var key in keysToRemove)
+                    ModelState.Remove(key);
+                if (!ModelState.IsValid)
+                    return View("RegisterAdmin", adminModel);
+                if (_context.Comptes.Any(c => c.Email == adminModel.Email))
+                {
+                    TempData["ErrorToast"] = "Email is already in use.";
+                    return View("RegisterAdmin", adminModel);
+                }
+                var compte = new Compte
+                {
+                    Email = adminModel.Email,
+                    Motdepasse = adminModel.Password
+                };
+                _context.Comptes.Add(compte);
+                await _context.SaveChangesAsync();
+                var admin = new Admin { Idcompte = compte.Idcompte };
+                _context.Admins.Add(admin);
+                await _context.SaveChangesAsync();
+                TempData["SuccessToast"] = "Admin account created successfully. Please log in.";
+                return View("RegisterAdmin");
+            }
+            if (role == "client")
+            {
+                // Remove validation errors for fields not in ClientRegisterViewModel
+                var allowedKeys = new HashSet<string> {
+                    nameof(clientModel.Email),
+                    nameof(clientModel.Prenom),
+                    nameof(clientModel.Nom),
+                    nameof(clientModel.Numerotelephone),
+                    nameof(clientModel.Datenaissance),
+                    nameof(clientModel.Adresse),
+                    nameof(clientModel.Sexe),
+                    nameof(clientModel.Password),
+                    "role"
+                };
+                var keysToRemove = ModelState.Keys.Where(k => !allowedKeys.Contains(k) && !k.StartsWith("clientModel.")).ToList();
+                foreach (var key in keysToRemove)
+                    ModelState.Remove(key);
+                if (!ModelState.IsValid)
+                    return View("RegisterClient", clientModel);
+                if (_context.Comptes.Any(c => c.Email == clientModel.Email))
+                {
+                    TempData["ErrorToast"] = "Email is already in use.";
+                    return View("RegisterClient", clientModel);
+                }
+                var compte = new Compte
+                {
+                    Email = clientModel.Email,
+                    Motdepasse = clientModel.Password
+                };
+                _context.Comptes.Add(compte);
+                await _context.SaveChangesAsync();
+                var client = new Client
+                {
+                    Nom = clientModel.Nom,
+                    Prenom = clientModel.Prenom,
+                    Numerotelephone = clientModel.Numerotelephone,
+                    Datenaissance = DateOnly.FromDateTime(clientModel.Datenaissance),
+                    Adresse = clientModel.Adresse,
+                    Sexe = clientModel.Sexe,
+                    Idcompte = compte.Idcompte
+                };
+                _context.Clients.Add(client);
+                await _context.SaveChangesAsync();
+                TempData["SuccessToast"] = "Account created successfully. Please log in.";
+                return View("RegisterClient");
+            }
+            if (role == "serviceclient")
+            {
+                // Remove validation errors for fields not in ServiceClientRegisterViewModel
+                var allowedKeys = new HashSet<string> {
+                    nameof(serviceClientModel.Email),
+                    nameof(serviceClientModel.Prenom),
+                    nameof(serviceClientModel.Nom),
+                    nameof(serviceClientModel.Numerotelephone),
+                    nameof(serviceClientModel.Datenaissance),
+                    nameof(serviceClientModel.Adresse),
+                    nameof(serviceClientModel.Sexe),
+                    nameof(serviceClientModel.Password),
+                    "role"
+                };
+                var keysToRemove = ModelState.Keys.Where(k => !allowedKeys.Contains(k) && !k.StartsWith("serviceClientModel.")).ToList();
+                foreach (var key in keysToRemove)
+                    ModelState.Remove(key);
+                if (!ModelState.IsValid)
+                    return View("RegisterServiceClient", serviceClientModel);
+                if (_context.Comptes.Any(c => c.Email == serviceClientModel.Email))
+                {
+                    TempData["ErrorToast"] = "Email is already in use.";
+                    return View("RegisterServiceClient", serviceClientModel);
+                }
+                var compte = new Compte
+                {
+                    Email = serviceClientModel.Email,
+                    Motdepasse = serviceClientModel.Password
+                };
+                _context.Comptes.Add(compte);
+                await _context.SaveChangesAsync();
+                var serviceclient = new Serviceclient
+                {
+                    Nom = serviceClientModel.Nom,
+                    Prenom = serviceClientModel.Prenom,
+                    Numerotelephone = serviceClientModel.Numerotelephone,
+                    Datenaissance = DateOnly.FromDateTime(serviceClientModel.Datenaissance),
+                    Adresse = serviceClientModel.Adresse,
+                    Sexe = serviceClientModel.Sexe,
+                    Idcompte = compte.Idcompte
+                };
+                _context.Serviceclients.Add(serviceclient);
+                await _context.SaveChangesAsync();
+                TempData["SuccessToast"] = "Account created successfully. Please log in.";
+                return View("RegisterServiceClient");
+            }
+            if (role == "prestataire")
+            {
+                // Remove validation errors for fields not in PrestataireDemandeViewModel
+                var allowedKeys = new HashSet<string> {
+                    nameof(prestataireModel.Email),
+                    nameof(prestataireModel.Prenom),
+                    nameof(prestataireModel.Nom),
+                    nameof(prestataireModel.Numerotelephone),
+                    nameof(prestataireModel.Datenaissance),
+                    nameof(prestataireModel.Adresse),
+                    nameof(prestataireModel.Nin),
+                    nameof(prestataireModel.Typeservice),
+                    nameof(prestataireModel.CvFile),
+                    nameof(prestataireModel.CasierjudiciaireFile),
+                    nameof(prestataireModel.Diplomes),
+                    "role"
+                };
+                var keysToRemove = ModelState.Keys.Where(k => !allowedKeys.Contains(k) && !k.StartsWith("Diplomes") && !k.StartsWith("prestataireModel.")).ToList();
+                foreach (var key in keysToRemove)
+                    ModelState.Remove(key);
+                try
+                {
+                    if (!ModelState.IsValid)
+                    {
+                        // Ensure the diplomas section is initialized for the view if validation fails
+                        if (prestataireModel.Diplomes == null || prestataireModel.Diplomes.Count == 0)
+                            prestataireModel.Diplomes = new List<DiplomeDemandeInputModel> { new DiplomeDemandeInputModel() };
+                        return View("RegisterPrestataireDemande", prestataireModel);
+                    }
+                    if (_context.Demandeprestataires.Any(d => d.Email == prestataireModel.Email && d.Etat == "pending") || _context.Comptes.Any(c => c.Email == prestataireModel.Email))
+                    {
+                        TempData["ErrorToast"] = "A demand or account with this email already exists.";
+                        if (prestataireModel.Diplomes == null || prestataireModel.Diplomes.Count == 0)
+                            prestataireModel.Diplomes = new List<DiplomeDemandeInputModel> { new DiplomeDemandeInputModel() };
+                        return View("RegisterPrestataireDemande", prestataireModel);
+                    }
+                    var demandeprestataire = new Demandeprestataire
+                    {
+                        Nom = prestataireModel.Nom,
+                        Prenom = prestataireModel.Prenom,
+                        Numtel = prestataireModel.Numerotelephone,
+                        Datenaissance = DateOnly.FromDateTime(prestataireModel.Datenaissance),
+                        Adresse = prestataireModel.Adresse,
+                        Nin = prestataireModel.Nin,
+                        Typeservice = prestataireModel.Typeservice,
+                        Email = prestataireModel.Email,
+                        Etat = "pending"
+                    };
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
+                    if (prestataireModel.CvFile != null && prestataireModel.CvFile.Length > 0)
+                    {
+                        var cvGuid = Guid.NewGuid().ToString() + Path.GetExtension(prestataireModel.CvFile.FileName);
+                        var cvPath = Path.Combine(uploadsFolder, cvGuid);
+                        using (var stream = new FileStream(cvPath, FileMode.Create))
+                        {
+                            await prestataireModel.CvFile.CopyToAsync(stream);
+                        }
+                        demandeprestataire.Cv = cvGuid;
+                    }
+                    if (prestataireModel.CasierjudiciaireFile != null && prestataireModel.CasierjudiciaireFile.Length > 0)
+                    {
+                        var casierGuid = Guid.NewGuid().ToString() + Path.GetExtension(prestataireModel.CasierjudiciaireFile.FileName);
+                        var casierPath = Path.Combine(uploadsFolder, casierGuid);
+                        using (var stream = new FileStream(casierPath, FileMode.Create))
+                        {
+                            await prestataireModel.CasierjudiciaireFile.CopyToAsync(stream);
+                        }
+                        demandeprestataire.Casierjudiciaire = casierGuid;
+                    }
+                    _context.Demandeprestataires.Add(demandeprestataire);
+                    await _context.SaveChangesAsync();
+                    if (prestataireModel.Diplomes != null && prestataireModel.Diplomes.Count > 0)
+                    {
+                        foreach (var diplomaInput in prestataireModel.Diplomes)
+                        {
+                            if (diplomaInput?.File != null && diplomaInput.File.Length > 0)
+                            {
+                                var diplomaGuid = Guid.NewGuid().ToString() + Path.GetExtension(diplomaInput.File.FileName);
+                                var diplomaPath = Path.Combine(uploadsFolder, diplomaGuid);
+                                using (var stream = new FileStream(diplomaPath, FileMode.Create))
+                                {
+                                    await diplomaInput.File.CopyToAsync(stream);
+                                }
+                                var diplome = new Diplomedemande
+                                {
+                                    Institution = diplomaInput.Institution,
+                                    Type = diplomaInput.Type,
+                                    Anneeobtention = diplomaInput.AnneeObtention,
+                                    Fiche = diplomaGuid,
+                                    Iddemandeprestataire = demandeprestataire.Iddemandeprestataire
+                                };
+                                _context.Diplomedemandes.Add(diplome);
+                            }
+                        }
+                        await _context.SaveChangesAsync();
+                    }
+                    TempData["SuccessToast"] = "Demande sent successfully. You will be able to log in once approved.";
+                    return View("RegisterPrestataireDemande");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", $"An error occurred: {ex.Message}");
+                    return View("RegisterPrestataireDemande", prestataireModel);
+                }
+            }
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult AdminDashboard()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult ClientDashboard()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult ServiceClientDashboard()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult PrestataireDashboard()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+            return RedirectToAction("Login");
+        }
+    }
+}

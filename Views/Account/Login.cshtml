@@ -1,0 +1,35 @@
+@model dynamic
+@{
+    ViewData["Title"] = "Login";
+}
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="card shadow-lg p-4" style="max-width: 400px; width: 100%;">
+        <h2 class="mb-4 text-center">Login</h2>
+        @if (ViewBag.ErrorMessage != null)
+        {
+            <div class="alert alert-danger" role="alert">
+                @ViewBag.ErrorMessage
+            </div>
+        }
+        @if (ViewData["Error"] != null)
+        {
+            <div class="alert alert-danger" role="alert">
+                @ViewData["Error"]
+            </div>
+        }
+        <form asp-action="Login" method="post">
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required />
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required />
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+        <div class="text-center mt-3">
+            <span>Don't have an account?</span> <a asp-action="Register">Sign up</a>
+        </div>
+    </div>
+</div>

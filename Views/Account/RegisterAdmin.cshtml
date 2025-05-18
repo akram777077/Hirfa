@@ -1,0 +1,40 @@
+@model Hirfa.Web.ViewModels.AdminRegisterViewModel
+@{
+    ViewData["Title"] = "Sign Up - Admin";
+}
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="card shadow-lg p-4" style="max-width: 600px; width: 100%;">
+        <h2 class="mb-4 text-center">Create Admin Account</h2>
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                <ul>
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+                </ul>
+            </div>
+        }
+        <form asp-action="Register" method="post">
+            <input type="hidden" name="role" value="admin" />
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control" type="password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-success w-100">Sign Up</button>
+        </form>
+        <div class="text-center mt-3">
+            <span>Already have an account?</span> <a asp-action="Login">Login</a>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
