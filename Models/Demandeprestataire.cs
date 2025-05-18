@@ -25,6 +25,7 @@ public partial class Demandeprestataire
 
     public string? Cv { get; set; }
 
+    // For mapping to DemandeclientStatus in Demandeclient
     public string Etat { get; set; } = null!;
 
     public string? Casierjudiciaire { get; set; }

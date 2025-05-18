@@ -14,6 +14,7 @@
 @{
     var userName = Context.Session.GetString("UserName");
     bool isLoggedIn = !string.IsNullOrEmpty(userName);
+    var userRole = Context.Session.GetString("UserRole"); // Add this line
 }
 <header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
@@ -27,6 +28,12 @@
                     <li class="nav-item">
                         <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                     </li>
+                    @if (isLoggedIn && userRole == "serviceclient")
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-white" asp-controller="Account" asp-action="PrestataireDemands">Prestataire Demands</a>
+                        </li>
+                    }
                 </ul>
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     @if (isLoggedIn)

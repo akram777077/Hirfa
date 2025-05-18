@@ -13,7 +13,7 @@ public partial class Demandeclient
 
     public DateOnly? Datefin { get; set; }
 
-    public string Etat { get; set; } = null!;
+    public DemandeclientStatus Etat { get; set; }
 
     public string? Description { get; set; }
 

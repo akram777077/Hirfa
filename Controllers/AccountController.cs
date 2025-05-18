@@ -42,14 +42,28 @@ namespace Hirfa.Web.Controllers
                     TempData["ErrorToast"] = "Your account is not yet approved or is inactive.";
                     return View();
                 }
+                HttpContext.Session.SetString("UserName", compte.Email);
+                HttpContext.Session.SetString("UserRole", "prestataire");
                 return RedirectToAction("PrestataireDashboard");
             }
             if (_context.Admins.Any(a => a.Idcompte == compte.Idcompte))
+            {
+                HttpContext.Session.SetString("UserName", compte.Email);
+                HttpContext.Session.SetString("UserRole", "admin");
                 return RedirectToAction("AdminDashboard");
+            }
             if (_context.Clients.Any(c => c.Idcompte == compte.Idcompte))
+            {
+                HttpContext.Session.SetString("UserName", compte.Email);
+                HttpContext.Session.SetString("UserRole", "client");
                 return RedirectToAction("ClientDashboard");
+            }
             if (_context.Serviceclients.Any(s => s.Idcompte == compte.Idcompte))
+            {
+                HttpContext.Session.SetString("UserName", compte.Email);
+                HttpContext.Session.SetString("UserRole", "serviceclient");
                 return RedirectToAction("ServiceClientDashboard");
+            }
             if (_context.Demandeprestataires.Any(d => d.Email == compte.Email && d.Etat == "pending"))
             {
                 TempData["ErrorToast"] = "Your account is pending approval. You will be able to log in once approved.";
@@ -328,6 +342,8 @@ namespace Hirfa.Web.Controllers
         [HttpGet]
         public IActionResult ServiceClientDashboard()
         {
+            // Add Prestataire Demands to the navbar by using the shared layout or partials in the view
+            ViewBag.Demandeclients = _context.Demandeclients.ToList();
             return View();
         }
 
@@ -342,6 +358,104 @@ namespace Hirfa.Web.Controllers
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Login");
+        }
+
+        [HttpGet]
+        public IActionResult PrestataireDemands()
+        {
+            var demandes = _context.Demandeprestataires
+                .Select(d => new ViewModels.PrestataireDemandeListItemViewModel
+                {
+                    Iddemandeprestataire = d.Iddemandeprestataire,
+                    Nom = d.Nom,
+                    Prenom = d.Prenom,
+                    Email = d.Email,
+                    Typeservice = d.Typeservice,
+                    Etat = d.Etat
+                })
+                .ToList();
+            return View("PrestataireDemands", demandes);
+        }
+
+        [HttpGet]
+        public IActionResult PrestataireDemandDetails(int id)
+        {
+            var demande = _context.Demandeprestataires
+                .Where(d => d.Iddemandeprestataire == id)
+                .Select(d => new ViewModels.PrestataireDemandeDetailViewModel
+                {
+                    Iddemandeprestataire = d.Iddemandeprestataire,
+                    Nom = d.Nom,
+                    Prenom = d.Prenom,
+                    Datenaissance = d.Datenaissance,
+                    Numtel = d.Numtel,
+                    Nin = d.Nin,
+                    Typeservice = d.Typeservice,
+                    Adresse = d.Adresse,
+                    Email = d.Email,
+                    Cv = d.Cv,
+                    Etat = d.Etat,
+                    Casierjudiciaire = d.Casierjudiciaire,
+                    Diplomes = d.Diplomedemandes.Select(di => new ViewModels.DiplomeDemandeDetailViewModel
+                    {
+                        Institution = di.Institution,
+                        Type = di.Type,
+                        Anneeobtention = di.Anneeobtention,
+                        Fiche = di.Fiche
+                    }).ToList()
+                })
+                .FirstOrDefault();
+            if (demande == null)
+                return NotFound();
+            return View("PrestataireDemandDetails", demande);
+        }
+
+        [HttpPost]
+        public IActionResult AcceptDemandeClient(int id)
+        {
+            var demande = _context.Demandeclients.FirstOrDefault(d => d.Iddemandeclient == id);
+            if (demande == null)
+                return NotFound();
+            demande.Etat = Models.DemandeclientStatus.Valide;
+            _context.SaveChanges();
+            TempData["SuccessToast"] = "Demande accepted and status set to Valide.";
+            return RedirectToAction("ServiceClientDashboard");
+        }
+
+        [HttpPost]
+        public IActionResult RejectDemandeClient(int id)
+        {
+            var demande = _context.Demandeclients.FirstOrDefault(d => d.Iddemandeclient == id);
+            if (demande == null)
+                return NotFound();
+            demande.Etat = Models.DemandeclientStatus.NonValide;
+            _context.SaveChanges();
+            TempData["SuccessToast"] = "Demande rejected and status set to NonValide.";
+            return RedirectToAction("ServiceClientDashboard");
+        }
+
+        [HttpPost]
+        public IActionResult AcceptDemandePrestataire(int id)
+        {
+            var demande = _context.Demandeprestataires.FirstOrDefault(d => d.Iddemandeprestataire == id);
+            if (demande == null)
+                return NotFound();
+            demande.Etat = "valide";
+            _context.SaveChanges();
+            TempData["SuccessToast"] = "Demande prestataire accepted and status set to valide.";
+            return RedirectToAction("PrestataireDemandDetails", new { id });
+        }
+
+        [HttpPost]
+        public IActionResult RejectDemandePrestataire(int id)
+        {
+            var demande = _context.Demandeprestataires.FirstOrDefault(d => d.Iddemandeprestataire == id);
+            if (demande == null)
+                return NotFound();
+            demande.Etat = "non valide";
+            _context.SaveChanges();
+            TempData["SuccessToast"] = "Demande prestataire rejected and status set to non valide.";
+            return RedirectToAction("PrestataireDemandDetails", new { id });
         }
     }
 }

@@ -1,7 +1,53 @@
 @{
     ViewData["Title"] = "Service Client Dashboard";
+    var demandes = (List<Hirfa.Web.Models.Demandeclient>)ViewBag.Demandeclients;
 }
 <div class="container mt-5">
     <h2>Welcome, Service Client!</h2>
     <p>This is the service client dashboard. You are logged in as a service client.</p>
+    <h4 class="mt-4">Client Demands</h4>
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>Description</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (demandes != null && demandes.Count > 0)
+        {
+            foreach (var d in demandes)
+            {
+                <tr>
+                    <td>@d.Iddemandeclient</td>
+                    <td>@d.Description</td>
+                    <td>@d.Etat</td>
+                    <td>
+                        @if (d.Etat == Hirfa.Web.Models.DemandeclientStatus.Pending)
+                        {
+                            <form asp-action="AcceptDemandeClient" method="post" style="display:inline">
+                                <input type="hidden" name="id" value="@d.Iddemandeclient" />
+                                <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                            </form>
+                            <form asp-action="RejectDemandeClient" method="post" style="display:inline">
+                                <input type="hidden" name="id" value="@d.Iddemandeclient" />
+                                <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <span class="text-muted">No actions</span>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="4" class="text-center">No client demands found.</td></tr>
+        }
+        </tbody>
+    </table>
 </div>

@@ -138,7 +138,9 @@ public partial class HirfaDbContext : DbContext
                 .HasColumnName("datedemande");
             entity.Property(e => e.Datefin).HasColumnName("datefin");
             entity.Property(e => e.Description).HasColumnName("description");
-            entity.Property(e => e.Etat).HasColumnName("etat");
+            entity.Property(e => e.Etat)
+                .HasConversion<string>()
+                .HasColumnName("etat");
             entity.Property(e => e.Idclient).HasColumnName("idclient");
             entity.Property(e => e.Idprestataire).HasColumnName("idprestataire");
 
