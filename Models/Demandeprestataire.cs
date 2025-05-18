@@ -30,6 +30,8 @@ public partial class Demandeprestataire
 
     public string? Casierjudiciaire { get; set; }
 
+    public string? Reason { get; set; } // Reason for non valid status
+
     public virtual ICollection<Diplomedemande> Diplomedemandes { get; set; } = new List<Diplomedemande>();
 
     public virtual ICollection<Prestataire> Prestataires { get; set; } = new List<Prestataire>();

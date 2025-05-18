@@ -183,6 +183,10 @@ public partial class HirfaDbContext : DbContext
                 .HasMaxLength(50)
                 .HasColumnName("prenom");
             entity.Property(e => e.Typeservice).HasColumnName("typeservice");
+            entity.Property(e => e.Reason)
+                .HasColumnName("reason")
+                .HasMaxLength(500)
+                .IsRequired(false);
         });
 
         modelBuilder.Entity<Devi>(entity =>

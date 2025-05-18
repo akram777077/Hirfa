@@ -10,6 +10,9 @@
             <p class="card-text mb-1"><strong>Email:</strong> @Model.Email</p>
             <p class="card-text mb-1"><strong>Type of Service:</strong> @Model.Typeservice</p>
             <p class="card-text mb-1"><strong>Status:</strong> <span class="badge @(Model.Etat == "pending" ? "bg-warning text-dark" : Model.Etat == "valide" ? "bg-success" : Model.Etat == "non valide" ? "bg-danger" : "bg-secondary")">@Model.Etat</span></p>
+            @if (Model.Etat == "non valide" && !string.IsNullOrWhiteSpace(Model.Reason)) {
+                <p class="card-text mb-1"><strong>Reason:</strong> <span class="text-danger">@Model.Reason</span></p>
+            }
             <p class="card-text mb-1"><strong>Date of Birth:</strong> @Model.Datenaissance?.ToString("yyyy-MM-dd")</p>
             <p class="card-text mb-1"><strong>Phone:</strong> @Model.Numtel</p>
             <p class="card-text mb-1"><strong>NIN:</strong> @Model.Nin</p>
@@ -48,9 +51,30 @@
             <input type="hidden" name="id" value="@Model.Iddemandeprestataire" />
             <button type="submit" class="btn btn-success">Valide</button>
         </form>
-        <form asp-action="RejectDemandePrestataire" method="post" class="d-inline ms-2">
-            <input type="hidden" name="id" value="@Model.Iddemandeprestataire" />
-            <button type="submit" class="btn btn-danger">Non Valide</button>
-        </form>
+        <button type="button" class="btn btn-danger ms-2" data-bs-toggle="modal" data-bs-target="#reasonModal">Non Valide</button>
+        <!-- Modal for entering reason -->
+        <div class="modal fade" id="reasonModal" tabindex="-1" aria-labelledby="reasonModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form asp-action="RejectDemandePrestataire" method="post">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="reasonModalLabel">Reason for Non Valid</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="id" value="@Model.Iddemandeprestataire" />
+                            <div class="mb-3">
+                                <label for="reasonInput" class="form-label">Please enter the reason:</label>
+                                <textarea class="form-control" id="reasonInput" name="reason" rows="3" required></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-danger">OK</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

@@ -396,6 +396,7 @@ namespace Hirfa.Web.Controllers
                     Cv = d.Cv,
                     Etat = d.Etat,
                     Casierjudiciaire = d.Casierjudiciaire,
+                    Reason = d.Reason, // Map Reason
                     Diplomes = d.Diplomedemandes.Select(di => new ViewModels.DiplomeDemandeDetailViewModel
                     {
                         Institution = di.Institution,
@@ -447,12 +448,13 @@ namespace Hirfa.Web.Controllers
         }
 
         [HttpPost]
-        public IActionResult RejectDemandePrestataire(int id)
+        public IActionResult RejectDemandePrestataire(int id, string reason)
         {
             var demande = _context.Demandeprestataires.FirstOrDefault(d => d.Iddemandeprestataire == id);
             if (demande == null)
                 return NotFound();
             demande.Etat = "non valide";
+            demande.Reason = reason;
             _context.SaveChanges();
             TempData["SuccessToast"] = "Demande prestataire rejected and status set to non valide.";
             return RedirectToAction("PrestataireDemandDetails", new { id });
