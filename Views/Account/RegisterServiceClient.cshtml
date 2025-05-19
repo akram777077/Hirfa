@@ -2,12 +2,134 @@
 @{
     ViewData["Title"] = "Sign Up - Service Client";
 }
-<div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
-    <div class="card shadow-lg p-4" style="max-width: 600px; width: 100%;">
-        <h2 class="mb-4 text-center">Create Service Client Account</h2>
-        @if (!ViewData.ModelState.IsValid)
+
+<style>
+    /* Styles specific to the Auth pages (can be shared with Login, RegisterAdmin etc.) */
+    /* These styles should ideally be in your site.css or a dedicated auth.css */
+    .auth-page-container {
+        min-height: 85vh;
+        background-color: #f0f2f5; /* Consistent light grey */
+        padding-top: 2rem; 
+        padding-bottom: 2rem;
+    }
+
+    .auth-card {
+        max-width: 700px; /* Wider card for more fields */
+        width: 100%;
+        background-color: #fff;
+        border-radius: 1rem;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+        padding: 2.5rem;
+        border: none;
+    }
+
+    .auth-card .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .auth-card .auth-header h2 {
+        font-weight: 700;
+        color: #2c3e50;
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+    .auth-card .auth-header p {
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+
+    .auth-card .form-label {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #495057;
+        margin-bottom: 0.3rem;
+    }
+
+    .auth-card .form-control,
+    .auth-card .form-select { 
+        border-radius: 0.5rem;
+        border: 1px solid #ced4da;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        background-color: #f8f9fa;
+    }
+    .auth-card .form-control:focus,
+    .auth-card .form-select:focus {
+        border-color: #2575fc; /* Theme primary color */
+        box-shadow: 0 0 0 0.25rem rgba(37, 117, 252, 0.2);
+        background-color: #fff;
+    }
+
+    .auth-card .btn-submit-auth { 
+        border-radius: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #fff;
+        transition: all 0.3s ease;
+    }
+    .auth-card .btn-submit-auth.btn-primary-auth { 
+        background: linear-gradient(135deg, #5e25c7 0%, #2575fc 100%);
+        border: none;
+        box-shadow: 0 4px 15px rgba(37, 117, 252, 0.2);
+    }
+     .auth-card .btn-submit-auth.btn-primary-auth:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(37, 117, 252, 0.35);
+    }
+
+    .auth-card .alert-danger {
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        padding: 0.8rem 1rem;
+        background-color: #f8d7da;
+        color: #721c24;
+        border-color: #f5c6cb;
+    }
+     .auth-card .alert-danger ul {
+        margin-bottom: 0;
+        padding-left: 1.2rem;
+    }
+    .auth-card .alert-danger li { margin-bottom: 0.25rem; }
+    .auth-card .alert-danger li:last-child { margin-bottom: 0; }
+
+    .auth-card .login-link-container {
+        text-align: center;
+        margin-top: 1.5rem;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    .auth-card .login-link-container a {
+        color: #2575fc;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .auth-card .login-link-container a:hover {
+        text-decoration: underline;
+    }
+
+    .auth-card .text-danger { 
+        font-size: 0.8em;
+        display: block; 
+        margin-top: 0.2rem;
+    }
+</style>
+
+<div class="container-fluid auth-page-container d-flex align-items-center justify-content-center">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Create Service Client Account</h2>
+            <p>Register to access specialized services and manage your projects efficiently.</p>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
         {
-            <div class="alert alert-danger">
+            <div class="alert alert-danger" role="alert">
+                <h5 class="alert-heading" style="font-size: 1rem; margin-bottom: 0.5rem;"><i class="bi bi-exclamation-triangle-fill me-2"></i>Please correct the following errors:</h5>
                 <ul>
                 @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
                 {
@@ -16,59 +138,91 @@
                 </ul>
             </div>
         }
-        <form asp-action="Register" method="post">
-            <input type="hidden" name="role" value="serviceclient" />
+
+        <form asp-action="RegisterServiceClient" asp-controller="Account" method="post"> @* ENSURE THIS ACTION NAME IS CORRECT *@
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="role" value="ServiceClient" /> @* ENSURE THIS ROLE STRING IS CORRECT *@
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Prenom" class="form-label">First Name</label>
+                    <input asp-for="Prenom" class="form-control" placeholder="e.g., Alex" />
+                    <span asp-validation-for="Prenom" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Nom" class="form-label">Last Name</label>
+                    <input asp-for="Nom" class="form-control" placeholder="e.g., Smith" />
+                    <span asp-validation-for="Nom" class="text-danger"></span>
+                </div>
+            </div>
+
             <div class="mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control" />
+                <label asp-for="Email" class="form-label">Business Email</label>
+                <input asp-for="Email" class="form-control" placeholder="you@company.com" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" class="form-control" type="password" />
-                <span asp-validation-for="Password" class="text-danger"></span>
+
+            <div class="row">
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" type="password" placeholder="Create a strong password" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
             </div>
+            
+            @* Service Clients might have different fields than regular clients. Adjust as needed. *@
+            @* For example, they might have a Company Name field instead of or in addition to personal details. *@
+            @*
             <div class="mb-3">
-                <label asp-for="Prenom" class="form-label"></label>
-                <input asp-for="Prenom" class="form-control" />
-                <span asp-validation-for="Prenom" class="text-danger"></span>
+                <label asp-for="CompanyName" class="form-label">Company Name (Optional)</label>
+                <input asp-for="CompanyName" class="form-control" placeholder="e.g., Acme Corp" />
+                <span asp-validation-for="CompanyName" class="text-danger"></span>
             </div>
-            <div class="mb-3">
-                <label asp-for="Nom" class="form-label"></label>
-                <input asp-for="Nom" class="form-control" />
-                <span asp-validation-for="Nom" class="text-danger"></span>
+            *@
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Numerotelephone" class="form-label">Contact Phone</label>
+                    <input asp-for="Numerotelephone" class="form-control" placeholder="e.g., +1234567890" />
+                    <span asp-validation-for="Numerotelephone" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Datenaissance" class="form-label">Primary Contact Date of Birth</label>
+                    <input asp-for="Datenaissance" class="form-control" type="date" />
+                    <span asp-validation-for="Datenaissance" class="text-danger"></span>
+                </div>
             </div>
+
             <div class="mb-3">
-                <label asp-for="Numerotelephone" class="form-label"></label>
-                <input asp-for="Numerotelephone" class="form-control" />
-                <span asp-validation-for="Numerotelephone" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Datenaissance" class="form-label"></label>
-                <input asp-for="Datenaissance" class="form-control" type="date" />
-                <span asp-validation-for="Datenaissance" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Adresse" class="form-label"></label>
-                <input asp-for="Adresse" class="form-control" />
+                <label asp-for="Adresse" class="form-label">Business Address</label>
+                <input asp-for="Adresse" class="form-control" placeholder="e.g., 456 Business Rd, Suite 100, City" />
                 <span asp-validation-for="Adresse" class="text-danger"></span>
             </div>
-            <div class="mb-3">
-                <label asp-for="Sexe" class="form-label"></label>
+            
+            <div class="mb-4">
+                <label asp-for="Sexe" class="form-label">Primary Contact Gender</label>
                 <select asp-for="Sexe" class="form-select">
-                    <option value="">Select gender</option>
+                    <option value="">-- Select Gender --</option>
                     <option value="M">Male</option>
                     <option value="F">Female</option>
+                    <option value="O">Other</option> 
+                    <option value="N">Prefer not to say</option>
                 </select>
                 <span asp-validation-for="Sexe" class="text-danger"></span>
             </div>
-            <button type="submit" class="btn btn-success w-100">Sign Up</button>
+
+            @* Add any other fields specific to ServiceClientViewModel here *@
+
+            <button type="submit" class="btn btn-submit-auth btn-primary-auth w-100">Create Service Account</button>
         </form>
-        <div class="text-center mt-3">
-            <span>Already have an account?</span> <a asp-action="Login">Login</a>
+
+        <div class="login-link-container">
+            <span>Already have an account?</span>
+            <a asp-controller="Account" asp-action="Login">Login here</a>
         </div>
     </div>
 </div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }

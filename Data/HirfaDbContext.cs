@@ -187,6 +187,10 @@ public partial class HirfaDbContext : DbContext
                 .HasColumnName("reason")
                 .HasMaxLength(500)
                 .IsRequired(false);
+            entity.Property(e => e.Sexe)
+                .IsRequired()
+                .HasMaxLength(1)
+                .HasColumnName("sexe");
         });
 
         modelBuilder.Entity<Devi>(entity =>

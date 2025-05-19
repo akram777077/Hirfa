@@ -1,35 +1,190 @@
 @model dynamic
 @{
     ViewData["Title"] = "Login";
+    // Optional: You can add a specific body class for login/auth pages if needed
+    // ViewData["BodyClass"] = "bg-light-alt"; // Example class
 }
-<div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
-    <div class="card shadow-lg p-4" style="max-width: 400px; width: 100%;">
-        <h2 class="mb-4 text-center">Login</h2>
+
+<style>
+    /* Styles specific to the Login page */
+    .login-page-container {
+        min-height: 85vh; /* Ensure it takes enough height */
+        background-color: #f0f2f5; /* A very light grey, common for auth pages */
+        /* Optional: Add a subtle background pattern or gradient */
+        /* background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%); */
+    }
+
+    .login-card {
+        max-width: 420px; /* Slightly wider for better proportions */
+        width: 100%;
+        background-color: #fff;
+        border-radius: 1rem; /* More pronounced rounding */
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08); /* Softer, more diffused shadow */
+        padding: 2.5rem; /* More internal spacing */
+        border: none; /* Cleaner look */
+    }
+
+    .login-card .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .login-card .login-header .brand-logo {
+        /* If you have an SVG logo, you can style it here */
+        /* For example: display: block; margin: 0 auto 1rem auto; width: 80px; */
+    }
+
+    .login-card .login-header h2 {
+        font-weight: 700;
+        color: #2c3e50; /* Dark, professional color */
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+    .login-card .login-header p {
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+
+    .login-card .form-label {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #495057;
+        margin-bottom: 0.3rem; /* Tighter spacing to input */
+    }
+
+    .login-card .form-control {
+        border-radius: 0.5rem; /* Slightly more rounded inputs */
+        border: 1px solid #ced4da;
+        padding: 0.75rem 1rem; /* Comfortable padding */
+        font-size: 0.95rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        background-color: #f8f9fa; /* Subtle input background */
+    }
+    .login-card .form-control:focus {
+        border-color: #2575fc; /* Theme primary color */
+        box-shadow: 0 0 0 0.25rem rgba(37, 117, 252, 0.2); /* Softer focus shadow */
+        background-color: #fff;
+    }
+
+    .login-card .btn-login {
+        background: linear-gradient(135deg, #5e25c7 0%, #2575fc 100%);
+        border: none;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #fff;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(37, 117, 252, 0.2);
+    }
+    .login-card .btn-login:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(37, 117, 252, 0.35);
+    }
+
+    .login-card .alert-danger {
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        padding: 0.8rem 1rem;
+        display: flex;
+        align-items: center;
+        background-color: #f8d7da; /* Standard danger background */
+        color: #721c24; /* Standard danger text */
+        border-color: #f5c6cb; /* Standard danger border */
+    }
+    .login-card .alert-danger .bi { /* Bootstrap Icon */
+        margin-right: 0.6rem;
+        font-size: 1.1rem;
+    }
+
+    .login-card .signup-link-container {
+        text-align: center;
+        margin-top: 1.5rem;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    .login-card .signup-link-container a {
+        color: #2575fc; /* Theme primary color */
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .login-card .signup-link-container a:hover {
+        text-decoration: underline;
+    }
+
+    /* Optional: For social login buttons if you add them later */
+    .social-login-divider {
+        text-align: center;
+        margin: 1.5rem 0;
+        color: #adb5bd;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        position: relative;
+    }
+    .social-login-divider::before,
+    .social-login-divider::after {
+        content: "";
+        display: inline-block;
+        width: 35%;
+        height: 1px;
+        background-color: #dee2e6;
+        vertical-align: middle;
+        margin: 0 0.5rem;
+    }
+</style>
+
+<div class="container-fluid login-page-container d-flex align-items-center justify-content-center py-5">
+    <div class="login-card">
+        <div class="login-header">
+            <!-- Optional: Add your logo here -->
+            <!-- <img src="/path/to/your/logo.svg" alt="Hirfa.Web Logo" class="brand-logo"> -->
+            <h2>Welcome Back!</h2>
+            <p>Please enter your credentials to login.</p>
+        </div>
+
         @if (ViewBag.ErrorMessage != null)
         {
             <div class="alert alert-danger" role="alert">
-                @ViewBag.ErrorMessage
+                <i class="bi bi-exclamation-triangle-fill"></i> @ViewBag.ErrorMessage
             </div>
         }
         @if (ViewData["Error"] != null)
         {
             <div class="alert alert-danger" role="alert">
-                @ViewData["Error"]
+                <i class="bi bi-exclamation-triangle-fill"></i> @ViewData["Error"]
             </div>
         }
+
         <form asp-action="Login" method="post">
             <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" required />
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="you@example.com" required />
             </div>
-            <div class="mb-3">
+            <div class="mb-4">
                 <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" name="password" required />
+                <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required />
+                <div class="text-end mt-2">
+                     <a href="#" class="form-text text-muted small" style="text-decoration: none;">Forgot password?</a>
+                     @{ /* TODO: Implement Forgot Password functionality */ }
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary w-100">Login</button>
+            <button type="submit" class="btn btn-login w-100">Login</button>
         </form>
-        <div class="text-center mt-3">
-            <span>Don't have an account?</span> <a asp-action="Register">Sign up</a>
+
+        @* Optional: Divider for social logins
+        <div class="social-login-divider">
+            <span>Or continue with</span>
+        </div>
+        <div class="d-grid gap-2">
+             <button class="btn btn-outline-dark w-100"><i class="bi bi-google me-2"></i>Login with Google</button>
+             <button class="btn btn-outline-primary w-100"><i class="bi bi-facebook me-2"></i>Login with Facebook</button>
+        </div>
+        *@
+
+        <div class="signup-link-container">
+            <span>Don't have an account?</span> <a asp-controller="Account" asp-action="Register">Sign up now</a>
         </div>
     </div>
 </div>

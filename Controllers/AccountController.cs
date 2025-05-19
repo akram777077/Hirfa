@@ -328,9 +328,27 @@ namespace Hirfa.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult AdminDashboard()
+        public IActionResult AdminDashboard(string? status = null)
         {
-            return View();
+            var query = _context.Demandeprestataires.AsQueryable();
+            query = query.Where(d => d.Etat == "valide" || d.Etat == "non valide");
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(d => d.Etat == status);
+            }
+            var demandes = query
+                .Select(d => new ViewModels.PrestataireDemandeDetailViewModel
+                {
+                    Iddemandeprestataire = d.Iddemandeprestataire,
+                    Nom = d.Nom,
+                    Prenom = d.Prenom,
+                    Typeservice = d.Typeservice,
+                    Email = d.Email,
+                    Etat = d.Etat,
+                    Reason = d.Reason ?? string.Empty // Prevent null
+                })
+                .ToList();
+            return View("AdminDashboard", demandes ?? new List<ViewModels.PrestataireDemandeDetailViewModel>());
         }
 
         [HttpGet]
@@ -397,6 +415,7 @@ namespace Hirfa.Web.Controllers
                     Etat = d.Etat,
                     Casierjudiciaire = d.Casierjudiciaire,
                     Reason = d.Reason, // Map Reason
+                    Sexe = d.Sexe, // Map Sexe
                     Diplomes = d.Diplomedemandes.Select(di => new ViewModels.DiplomeDemandeDetailViewModel
                     {
                         Institution = di.Institution,
@@ -408,7 +427,7 @@ namespace Hirfa.Web.Controllers
                 .FirstOrDefault();
             if (demande == null)
                 return NotFound();
-            return View("PrestataireDemandDetails", demande);
+            return View(demande);
         }
 
         [HttpPost]
@@ -436,28 +455,61 @@ namespace Hirfa.Web.Controllers
         }
 
         [HttpPost]
-        public IActionResult AcceptDemandePrestataire(int id)
+        public async Task<IActionResult> CreatePrestataireAccount(int id, string password)
         {
             var demande = _context.Demandeprestataires.FirstOrDefault(d => d.Iddemandeprestataire == id);
-            if (demande == null)
+            if (demande == null || demande.Etat != Models.DemandeclientStatus.Valide.ToString())
                 return NotFound();
-            demande.Etat = "valide";
-            _context.SaveChanges();
-            TempData["SuccessToast"] = "Demande prestataire accepted and status set to valide.";
-            return RedirectToAction("PrestataireDemandDetails", new { id });
+            if (_context.Comptes.Any(c => c.Email == demande.Email))
+            {
+                TempData["ErrorToast"] = "An account with this email already exists.";
+                return RedirectToAction("AdminDashboard");
+            }
+            // Create Compte
+            var compte = new Models.Compte
+            {
+                Email = demande.Email,
+                Motdepasse = password
+            };
+            _context.Comptes.Add(compte);
+            await _context.SaveChangesAsync();
+            // Create Prestataire
+            var prestataire = new Models.Prestataire
+            {
+                Nom = demande.Nom,
+                Prenom = demande.Prenom,
+                Numerotelephone = demande.Numtel,
+                Datenaissance = demande.Datenaissance,
+                Adresse = demande.Adresse,
+                Sexe = demande.Sexe,
+                Estdisponible = true,
+                Nin = demande.Nin,
+                Typeservice = demande.Typeservice,
+                Cv = demande.Cv,
+                Casierjudiciaire = demande.Casierjudiciaire,
+                Idcompte = compte.Idcompte,
+                Iddemandeprestataire = demande.Iddemandeprestataire
+            };
+            _context.Prestataires.Add(prestataire);
+            // Set demand status to 'final valide' (strong typing)
+            demande.Etat = "final valide";
+            await _context.SaveChangesAsync();
+            // Redirect to Gmail with password in body
+            var gmailUrl = $"https://mail.google.com/mail/?view=cm&fs=1&to={demande.Email}&su=Your account has been created&body=Your account has been created and your password is: {System.Net.WebUtility.UrlEncode(password)}";
+            return Redirect(gmailUrl);
         }
 
         [HttpPost]
-        public IActionResult RejectDemandePrestataire(int id, string reason)
+        public IActionResult FinalRejectDemandePrestataire(int id)
         {
             var demande = _context.Demandeprestataires.FirstOrDefault(d => d.Iddemandeprestataire == id);
             if (demande == null)
                 return NotFound();
-            demande.Etat = "non valide";
-            demande.Reason = reason;
+            demande.Etat = "final non valide";
+            // Do not overwrite Reason, keep the existing one from service client
             _context.SaveChanges();
-            TempData["SuccessToast"] = "Demande prestataire rejected and status set to non valide.";
-            return RedirectToAction("PrestataireDemandDetails", new { id });
+            TempData["SuccessToast"] = "Demande prestataire rejected and status set to final non valide.";
+            return RedirectToAction("AdminDashboard");
         }
     }
 }

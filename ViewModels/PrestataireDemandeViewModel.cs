@@ -33,6 +33,9 @@ namespace Hirfa.Web.ViewModels
         [Required]
         public string Typeservice { get; set; } = null!;
 
+        [Required]
+        public string Sexe { get; set; } = null!;
+
         public IFormFile? CvFile { get; set; }
         public IFormFile? CasierjudiciaireFile { get; set; }
         public List<DiplomeDemandeInputModel>? Diplomes { get; set; }

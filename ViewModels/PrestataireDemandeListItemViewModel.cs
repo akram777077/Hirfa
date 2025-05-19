@@ -28,6 +28,7 @@ namespace Hirfa.Web.ViewModels
         public string Etat { get; set; } = null!;
         public string? Casierjudiciaire { get; set; }
         public string? Reason { get; set; } // Add this property
+        public string Sexe { get; set; } = null!;
         public List<DiplomeDemandeDetailViewModel> Diplomes { get; set; } = new();
     }
 
