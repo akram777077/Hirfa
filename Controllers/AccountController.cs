@@ -511,5 +511,35 @@ namespace Hirfa.Web.Controllers
             TempData["SuccessToast"] = "Demande prestataire rejected and status set to final non valide.";
             return RedirectToAction("AdminDashboard");
         }
+
+        [HttpPost]
+        public IActionResult AcceptDemandePrestataire(int id, string returnUrl)
+        {
+            var demande = _context.Demandeprestataires.FirstOrDefault(d => d.Iddemandeprestataire == id);
+            if (demande == null)
+                return NotFound();
+            demande.Etat = "valide";
+            demande.Reason = null;
+            _context.SaveChanges();
+            TempData["SuccessToast"] = "Demande accepted and status set to Valide.";
+            if (!string.IsNullOrEmpty(returnUrl))
+                return Redirect(returnUrl);
+            return RedirectToAction("PrestataireDemands");
+        }
+
+        [HttpPost]
+        public IActionResult RejectDemandePrestataire(int id, string reason, string returnUrl)
+        {
+            var demande = _context.Demandeprestataires.FirstOrDefault(d => d.Iddemandeprestataire == id);
+            if (demande == null)
+                return NotFound();
+            demande.Etat = "non valide";
+            demande.Reason = reason;
+            _context.SaveChanges();
+            TempData["SuccessToast"] = "Demande rejected and status set to Non Valide.";
+            if (!string.IsNullOrEmpty(returnUrl))
+                return Redirect(returnUrl);
+            return RedirectToAction("PrestataireDemands");
+        }
     }
 }
