@@ -21,7 +21,7 @@ namespace Hirfa.Web.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            return View();
+            return View("~/Views/Account/Login.cshtml");
         }
 
         [HttpPost]
@@ -31,7 +31,7 @@ namespace Hirfa.Web.Controllers
             if (compte == null)
             {
                 TempData["ErrorToast"] = "Invalid email or password.";
-                return View();
+                return View("~/Views/Account/Login.cshtml");
             }
             // Prestataire login restriction
             if (_context.Prestataires.Any(p => p.Idcompte == compte.Idcompte))
@@ -40,7 +40,7 @@ namespace Hirfa.Web.Controllers
                 if (prestataire != null && !prestataire.Estdisponible)
                 {
                     TempData["ErrorToast"] = "Your account is not yet approved or is inactive.";
-                    return View();
+                    return View("~/Views/Account/Login.cshtml");
                 }
                 HttpContext.Session.SetString("UserName", compte.Email);
                 HttpContext.Session.SetString("UserRole", "prestataire");
@@ -67,10 +67,10 @@ namespace Hirfa.Web.Controllers
             if (_context.Demandeprestataires.Any(d => d.Email == compte.Email && d.Etat == "pending"))
             {
                 TempData["ErrorToast"] = "Your account is pending approval. You will be able to log in once approved.";
-                return View();
+                return View("~/Views/Account/Login.cshtml");
             }
             TempData["ErrorToast"] = "No role assigned to this account.";
-            return View();
+            return View("~/Views/Account/Login.cshtml");
         }
 
         [HttpGet]
@@ -348,13 +348,13 @@ namespace Hirfa.Web.Controllers
                     Reason = d.Reason ?? string.Empty // Prevent null
                 })
                 .ToList();
-            return View("AdminDashboard", demandes ?? new List<ViewModels.PrestataireDemandeDetailViewModel>());
+            return View("~/Views/Admin/AdminDashboard.cshtml", demandes ?? new List<ViewModels.PrestataireDemandeDetailViewModel>());
         }
 
         [HttpGet]
         public IActionResult ClientDashboard()
         {
-            return View();
+            return View("~/Views/Client/ClientDashboard.cshtml");
         }
 
         [HttpGet]
@@ -362,13 +362,13 @@ namespace Hirfa.Web.Controllers
         {
             // Add Prestataire Demands to the navbar by using the shared layout or partials in the view
             ViewBag.Demandeclients = _context.Demandeclients.ToList();
-            return View();
+            return View("~/Views/ServiceClient/ServiceClientDashboard.cshtml");
         }
 
         [HttpGet]
         public IActionResult PrestataireDashboard()
         {
-            return View();
+            return View("Prestataire/PrestataireDashboard");
         }
 
         [HttpGet]
@@ -392,7 +392,7 @@ namespace Hirfa.Web.Controllers
                     Etat = d.Etat
                 })
                 .ToList();
-            return View("PrestataireDemands", demandes);
+            return View("~/Views/Prestataire/PrestataireDemands.cshtml", demandes);
         }
 
         [HttpGet]
@@ -427,7 +427,7 @@ namespace Hirfa.Web.Controllers
                 .FirstOrDefault();
             if (demande == null)
                 return NotFound();
-            return View(demande);
+            return View("~/Views/Prestataire/PrestataireDemandDetails.cshtml", demande);
         }
 
         [HttpPost]
