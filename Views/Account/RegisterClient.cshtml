@@ -151,7 +151,7 @@
             </div>
         }
 
-        <form asp-action="RegisterClient" asp-controller="Account" method="post"> @* Ensure asp-action and asp-controller are correct *@
+        <form asp-action="RegisterClient" asp-controller="Client" method="post"> 
             @Html.AntiForgeryToken()
             <input type="hidden" name="role" value="Client" /> @* Ensure this value matches your backend logic for "Client" role *@
 

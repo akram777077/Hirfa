@@ -210,7 +210,6 @@
     var userRole = Context.Session.GetString("UserRole");
 }
 <header>
-    @* ... Navbar code ... *@
     <nav class="navbar navbar-expand-lg navbar-dark navbar-modern">
         <div class="container-fluid">
             <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Hirfa.Web</a>
@@ -218,7 +217,11 @@
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
-                    @if (isLoggedIn && userRole == "serviceclient") { <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="PrestataireDemands">Prestataire Demands</a></li> }
+                    @if (isLoggedIn && userRole == "serviceclient") {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Prestataire" asp-action="PrestataireDemands">Prestataire Demands</a>
+                        </li>
+                    }
                 </ul>
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
                     @if (isLoggedIn) { <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-person-circle me-1"></i> @userName</a><ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown"><li><a class="dropdown-item" asp-controller="Account" asp-action="EditAccount"><i class="bi bi-pencil-square"></i>Edit Account</a></li><li><hr class="dropdown-divider"></li><li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="Logout"><i class="bi bi-box-arrow-right"></i>Logout</a></li></ul></li> }
@@ -231,7 +234,6 @@
 <div class="container mt-4 main-content-area">
     <main role="main" class="pb-3">
         @RenderBody()
-        @* ... Toast notifications container ... *@
         <div class="toast-container position-fixed bottom-0 end-0 p-3 toast-container-modern">
             @if (TempData["ErrorToast"] != null) { <div id="errorToast" class="toast toast-modern align-items-center text-bg-danger" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="7000"><div class="d-flex"><div class="toast-body"><i class="bi bi-x-octagon-fill toast-icon"></i> @TempData["ErrorToast"]</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div></div> }
             @if (TempData["SuccessToast"] != null) { <div id="successToast" class="toast toast-modern align-items-center text-bg-success" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000"><div class="d-flex"><div class="toast-body"><i class="bi bi-check-circle-fill toast-icon"></i> @TempData["SuccessToast"]</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div></div> }

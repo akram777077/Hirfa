@@ -190,7 +190,7 @@
             </div>
         }
 
-        <form asp-action="RegisterPrestataire" asp-controller="Account" method="post" enctype="multipart/form-data"> @* ENSURE ACTION NAME IS CORRECT *@
+        <form asp-action="RegisterPrestataireDemande" asp-controller="Prestataire" method="post" enctype="multipart/form-data"> 
             @Html.AntiForgeryToken()
             <input type="hidden" name="role" value="Prestataire" /> @* ENSURE ROLE STRING IS CORRECT *@
 

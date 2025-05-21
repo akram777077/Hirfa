@@ -310,7 +310,7 @@
                 <div class="action-buttons-panel">
                     <h5>Manage Application Status</h5>
                     
-                    <form asp-action="AcceptDemandePrestataire" method="post">
+                    <form asp-action="AcceptDemandePrestataire" asp-controller="Admin" method="post">
                         <input type="hidden" name="id" value="@Model.Iddemandeprestataire" />
                         <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
                         <button type="submit" class="btn btn-success">
@@ -383,7 +383,7 @@
     <div class="modal fade modal-modern" id="reasonModal_@Model.Iddemandeprestataire" tabindex="-1" aria-labelledby="reasonModalLabel_@Model.Iddemandeprestataire" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <form asp-action="RejectDemandePrestataire" method="post">
+                <form asp-action="RejectDemandePrestataire" asp-controller="Prestataire" method="post">
                     <div class="modal-header">
                         <h5 class="modal-title" id="reasonModalLabel_@Model.Iddemandeprestataire"><i class="bi bi-journal-x me-2"></i>Reason for Rejection</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
