@@ -15,13 +15,16 @@
     <link rel="stylesheet" href="~/Hirfa.Web.styles.css" asp-append-version="true"/>
 
     <style>
+        /* Ensure all styles are properly closed */
         body {
             font-family: 'Poppins', 'Inter', sans-serif;
             padding-top: 75px; /* Must match navbar height */
             background-color: #f8f9fa; /* Slightly lighter than #f4f7f6, more standard bootstrap light */
             display: flex; 
-            flex-direction: column; 
-            min-height: 100vh; 
+            flex-direction: column;
+            /* Ensure proper string termination */ 
+            min-height: 100vh;
+            /* Ensure proper string termination */ 
         }
         .main-content-area {
             flex-grow: 1; 
@@ -39,10 +42,12 @@
         .navbar-modern .dropdown-item { padding: 0.7rem 1.3rem; font-weight: 500; font-size: 0.9rem; color: #343a40; transition: background-color 0.2s ease, color 0.2s ease; display: flex; align-items: center; }
         .navbar-modern .dropdown-item .bi { margin-right: 0.75rem; font-size: 1.1rem; color: #6c757d; transition: color 0.2s ease; }
         .navbar-modern .dropdown-item:hover { background-color: #eaf2ff; color: #2575fc; }
+/* Ensure proper closure of dropdown items */
         .navbar-modern .dropdown-item:hover .bi { color: #2575fc; }
         .navbar-modern .dropdown-item.text-danger { color: #dc3545 !important; }
         .navbar-modern .dropdown-item.text-danger .bi { color: #dc3545 !important; }
         .navbar-modern .dropdown-item.text-danger:hover { background-color: #f8d7da; color: #721c24 !important; }
+/* Ensure proper closure of text-danger dropdown items */
         .navbar-modern .dropdown-item.text-danger:hover .bi { color: #721c24 !important; }
         .navbar-modern .dropdown-divider { margin: 0.6rem 0; border-top: 1px solid #e9ecef; }
 

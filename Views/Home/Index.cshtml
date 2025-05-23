@@ -361,7 +361,7 @@
         <h1 class="fw-bold mb-4">Welcome to <span class="text-gradient-primary">Hirfa</span> Service Platform</h1>
         <p class="lead mb-5" data-aos="fade-up" data-aos-delay="300">Your ultimate destination to find, request, and manage services seamlessly. Connect with top professionals or offer your expertise to a vibrant community.</p>
         <div class="cta-buttons" data-aos="fade-up" data-aos-delay="500">
-            <a asp-controller="Account" asp-action="Login" class="btn btn-modern btn-modern-light me-md-3 px-5 py-3">Login</a>
+            <a asp-controller="Shared/Login" asp-action="Login" class="btn btn-modern btn-modern-light me-md-3 px-5 py-3">Login</a>
             @if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 <a asp-controller="Account" asp-action="Logout" class="btn btn-modern btn-modern-danger px-5 py-3 ms-md-3 mt-2 mt-md-0">Logout</a>
