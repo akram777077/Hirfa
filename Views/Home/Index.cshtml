@@ -2,34 +2,592 @@
     ViewData["Title"] = "Home";
 }
 
-<div class="hero-section d-flex align-items-center justify-content-center" style="min-height: 80vh; background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); color: #fff;">
-    <div class="text-center">
-        <h1 class="display-3 fw-bold mb-4">Welcome to Hirfa Service Platform</h1>
-        <p class="lead mb-5">Find, request, and manage services with ease. Join as a client, service provider, or admin.</p>
-        <a asp-controller="Account" asp-action="Login" class="btn btn-light btn-lg me-3 px-5 py-2">Login</a>
-        <div class="dropdown d-inline-block">
-            <button class="btn btn-outline-light btn-lg px-5 py-2 dropdown-toggle" type="button" id="signupDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                Sign Up
-            </button>
-            <ul class="dropdown-menu" aria-labelledby="signupDropdown">
-                <li><a class="dropdown-item" asp-controller="Account" asp-action="RegisterClient">Sign Up as Client</a></li>
-                <li><a class="dropdown-item" asp-controller="Account" asp-action="RegisterServiceClient">Sign Up as Service Client</a></li>
-                <li><a class="dropdown-item" asp-controller="Account" asp-action="RegisterAdmin">Sign Up as Admin</a></li>
-                <li><a class="dropdown-item" asp-controller="Account" asp-action="RegisterPrestataire">Sign Up as Prestataire</a></li>
-            </ul>
+<style>
+    /* General Modern Styles */
+    body {
+        font-family: 'Poppins', 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Added Inter for a very modern feel */
+        color: #495057; /* Softer black */
+        line-height: 1.7;
+        background-color: #fdfdfd; /* Very light off-white background */
+        overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: 700;
+        color: #212529; /* Darker, more standard heading color */
+    }
+
+    .section-padding {
+        padding: 100px 0;
+    }
+
+    .bg-light-custom {
+        background-color: #f8f9fa;
+    }
+    .bg-dark-subtle-custom { /* For a richer, premium feel section */
+        background-color: #2c3e50; /* Dark blue-grey */
+        color: #e9ecef;
+    }
+    .bg-dark-subtle-custom h2, .bg-dark-subtle-custom h3, .bg-dark-subtle-custom h4, .bg-dark-subtle-custom p {
+        color: #e9ecef;
+    }
+    .bg-dark-subtle-custom .section-title h2::after {
+        background: #fff; /* White underline on dark bg */
+    }
+
+
+    .btn-modern {
+        border-radius: 8px; /* Slightly less rounded for a sharper look */
+        font-weight: 600;
+        text-transform: none; /* Often more modern than all-caps */
+        letter-spacing: 0.2px;
+        transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1); /* Smoother transition */
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        padding: 14px 35px;
+        font-size: 1rem;
+    }
+
+    .btn-modern-primary {
+        background: linear-gradient(135deg, #5e25c7 0%, #2575fc 100%); /* Refined gradient */
+        border: none;
+        color: #fff;
+    }
+    .btn-modern-primary:hover {
+        transform: translateY(-4px) scale(1.02);
+        box-shadow: 0 8px 20px rgba(64, 106, 217, 0.3);
+        color: #fff;
+    }
+
+    .btn-modern-light {
+        background-color: #fff;
+        border: 1px solid #dee2e6;
+        color: #2575fc;
+    }
+    .btn-modern-light:hover {
+        background-color: #f0f6ff;
+        border-color: #2575fc;
+        transform: translateY(-4px);
+        box-shadow: 0 6px 15px rgba(37, 117, 252, 0.15);
+        color: #2575fc;
+    }
+    
+    .btn-modern-danger {
+        background-color: #e74c3c;
+        border-color: #e74c3c;
+        color: #fff;
+    }
+    .btn-modern-danger:hover {
+        background-color: #c0392b;
+        border-color: #c0392b;
+        transform: translateY(-4px);
+        box-shadow: 0 6px 15px rgba(220, 53, 69, 0.25);
+        color: #fff;
+    }
+
+
+    .text-gradient-primary {
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+    }
+
+    /* Hero Section Specific Styles */
+    .hero-section {
+        min-height: 100vh; /* Full viewport height */
+        color: #fff;
+        /* Example of using a high-quality image with a subtle overlay */
+        background: linear-gradient(rgba(44, 62, 80, 0.6), rgba(37, 117, 252, 0.5)), url('/img/hero-background-abstract.jpg');
+        /* === OR an animated gradient (more complex, example below) === */
+        /* background: linear-gradient(-45deg, #6a11cb, #2575fc, #2c3e50, #3498db);
+        background-size: 400% 400%;
+        animation: gradientBG 15s ease infinite; */
+        background-size: cover;
+        background-position: center center;
+        display: flex; /* Ensure flex properties from parent are applied */
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden; /* For any ::before/::after effects */
+    }
+    /* @@keyframes gradientBG {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    } */
+
+    .hero-content {
+        max-width: 800px;
+        z-index: 1; /* Above any pseudo elements */
+    }
+
+    .hero-section h1 {
+        font-size: 4.2rem; /* Even larger */
+        font-weight: 800; /* Bolder */
+        text-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        line-height: 1.2;
+    }
+
+    .hero-section p.lead {
+        font-size: 1.5rem;
+        font-weight: 300; /* Light for contrast with bold heading */
+        margin-bottom: 3rem !important;
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        max-width: 650px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Section Title Styling */
+    .section-title {
+        margin-bottom: 70px;
+        text-align: center;
+    }
+    .section-title h2 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        position: relative;
+        padding-bottom: 20px;
+        color: #2c3e50;
+    }
+    .section-title h2::after {
+        content: '';
+        position: absolute;
+        display: block;
+        width: 70px; /* Shorter, thicker line */
+        height: 5px;
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 3px;
+    }
+    .section-title p.subtitle { /* Specific class for subtitle */
+        font-size: 1.15rem;
+        color: #6c757d;
+        max-width: 650px;
+        margin: 0 auto;
+        line-height: 1.8;
+    }
+
+    /* How It Works Section - SVG Icons */
+    .how-it-works-step {
+        text-align: center;
+        padding: 25px;
+    }
+    .how-it-works-step .icon-container {
+        width: 90px;
+        height: 90px;
+        border-radius: 20px; /* Squircle shape */
+        background: linear-gradient(145deg, #f0f2ff, #cdd6ff); /* Softer gradient */
+        color: #2575fc; /* Icon color */
+        margin: 0 auto 25px auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 20px rgba(37, 117, 252, 0.15);
+        transition: all 0.3s ease;
+    }
+    .how-it-works-step:hover .icon-container {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 12px 25px rgba(37, 117, 252, 0.25);
+    }
+    .how-it-works-step .icon-container svg {
+        width: 40px;
+        height: 40px;
+    }
+    .how-it-works-step h4 {
+        font-size: 1.4rem;
+        margin-bottom: 10px;
+        color: #343a40;
+    }
+
+    /* Features Section - Elevated Card Design */
+    .feature-card {
+        background-color: #fff;
+        padding: 35px 30px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.07);
+        transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+        text-align: left; /* Align text left for a more formal look */
+        height: 100%;
+        border: 1px solid #e9ecef;
+    }
+    .feature-card:hover {
+        transform: translateY(-12px);
+        box-shadow: 0 18px 45px rgba(50,50,93,.12), 0 8px 15px rgba(0,0,0,.08);
+    }
+    .feature-card .icon-feature { /* Using a class for feature icons */
+        display: inline-flex; /* To align with text if needed */
+        align-items: center;
+        justify-content: center;
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        background-color: #eaf2ff; /* Light blue bg */
+        margin-bottom: 25px;
+    }
+    .feature-card .icon-feature svg {
+        width: 28px;
+        height: 28px;
+        fill: #2575fc; /* SVG fill color */
+    }
+    .feature-card h4 {
+        font-size: 1.3rem;
+        margin-bottom: 12px;
+        font-weight: 600;
+    }
+    .feature-card p {
+        font-size: 0.95rem;
+        color: #5a6268;
+    }
+
+    /* Join Us Section (Role Cards) - Premium Look */
+    .role-card {
+        background-color: #fff;
+        border-radius: 16px;
+        padding: 20px; /* Padding inside */
+        box-shadow: 0 15px 35px rgba(50,50,93,.08), 0 5px 15px rgba(0,0,0,.07);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncier transition */
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        overflow: hidden; /* For image fitting */
+        border: 1px solid transparent; /* For hover border */
+    }
+    .role-card:hover {
+        transform: translateY(-10px) scale(1.03);
+        box-shadow: 0 20px 50px rgba(37, 117, 252, 0.2), 0 10px 20px rgba(0,0,0,0.1);
+        border-color: #a1c4fd; /* Subtle border on hover */
+    }
+    .role-card .role-image-container {
+        width: 100%;
+        height: 180px; /* Fixed height for image consistency */
+        margin-bottom: 20px;
+        border-radius: 12px; /* Rounded corners for image area */
+        overflow: hidden; /* Crucial for object-fit */
+        background-color: #f0f4f8; /* Placeholder bg */
+    }
+    .role-card .role-image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Scales image to cover container, cropping if necessary */
+        transition: transform 0.4s ease;
+    }
+    .role-card:hover .role-image-container img {
+        transform: scale(1.08); /* Zoom image on hover */
+    }
+    .role-card .role-content {
+        padding: 10px 15px 20px; /* Padding for text content below image */
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    .role-card h4 {
+        font-size: 1.6rem;
+        margin-bottom: 8px;
+        color: #2c3e50;
+        font-weight: 600;
+    }
+    .role-card p {
+        font-size: 0.9rem;
+        color: #555;
+        margin-bottom: 25px;
+        flex-grow: 1;
+    }
+    .role-card .btn-modern {
+        width: 100%; /* Button takes full width of card content area */
+        margin-top: auto; /* Pushes button to bottom */
+    }
+
+    /* Footer */
+    .footer-modern {
+        background-color: #212529; /* Darker footer */
+        color: #ced4da;
+        padding: 50px 0;
+    }
+    .footer-modern p {
+        margin-bottom: 0;
+        font-size: 0.9rem;
+    }
+    .footer-modern a {
+        color: #2575fc;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    .footer-modern a:hover {
+        text-decoration: underline;
+        color: #80aaff;
+    }
+    .footer-modern .fas.fa-heart { /* Example, if you keep Font Awesome for this */
+        color: #e74c3c;
+    }
+    .footer-modern .svg-heart { /* If using SVG heart */
+        width: 16px; height: 16px; vertical-align: middle; margin: 0 3px;
+        fill: #e74c3c;
+    }
+
+    /* Responsive adjustments */
+    @@media (max-width: 991px) {
+        .hero-section h1 { font-size: 3.2rem; }
+        .hero-section p.lead { font-size: 1.3rem; }
+        .section-title h2 { font-size: 2.5rem; }
+        .role-card { margin-bottom: 30px; }
+    }
+     @@media (max-width: 768px) {
+        .section-padding { padding: 70px 0; }
+        .hero-section { min-height: 80vh; }
+        .hero-section h1 { font-size: 2.8rem; }
+        .hero-section p.lead { font-size: 1.15rem; }
+        .section-title h2 { font-size: 2.2rem; }
+        .how-it-works-step .icon-container { width: 80px; height: 80px; }
+        .how-it-works-step .icon-container svg { width: 35px; height: 35px; }
+        .feature-card { text-align: center; padding: 30px 20px; } /* Center feature card content on mobile */
+        .feature-card .icon-feature { margin-left: auto; margin-right: auto; }
+    }
+     @@media (max-width: 576px) {
+        .hero-content .btn-modern { display: block; width: 90%; margin: 15px auto !important; }
+        .role-card .role-image-container { height: 150px; }
+        .role-card h4 { font-size: 1.4rem; }
+    }
+</style>
+
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="text-center hero-content" data-aos="fade-up" data-aos-delay="100">
+        <h1 class="fw-bold mb-4">Welcome to <span class="text-gradient-primary">Hirfa</span> Service Platform</h1>
+        <p class="lead mb-5" data-aos="fade-up" data-aos-delay="300">Your ultimate destination to find, request, and manage services seamlessly. Connect with top professionals or offer your expertise to a vibrant community.</p>
+        <div class="cta-buttons" data-aos="fade-up" data-aos-delay="500">
+            <a asp-controller="Shared/Login" asp-action="Login" class="btn btn-modern btn-modern-light me-md-3 px-5 py-3">Login</a>
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                <a asp-controller="Account" asp-action="Logout" class="btn btn-modern btn-modern-danger px-5 py-3 ms-md-3 mt-2 mt-md-0">Logout</a>
+            }
         </div>
-        @if (User.Identity != null && User.Identity.IsAuthenticated)
-        {
-            <a asp-controller="Account" asp-action="Logout" class="btn btn-danger btn-lg px-5 py-2 ms-3">Logout</a>
-        }
     </div>
 </div>
 
-<style>
-.hero-section {
-    background-image: url('/wwwroot/img/hero-bg.svg');
-    background-size: cover;
-    background-position: center;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-}
-</style>
+<!-- About Hirfa Section -->
+<section id="about" class="section-padding">
+    <div class="container">
+        <div class="section-title" data-aos="fade-up">
+            <h2>What is <span class="text-gradient-primary">Hirfa</span>?</h2>
+            <p class="subtitle">Hirfa is a revolutionary platform meticulously crafted to connect skilled service providers (Prestataires) with clients seeking high-quality, reliable services. We are redefining the future of service exchange.</p>
+        </div>
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-4 mb-lg-0" data-aos="fade-right" data-aos-delay="200">
+                <!-- SUGGESTION: Use a dynamic, abstract, or modern tech-related illustration/photo -->
+                <img src="/img/about-hirfa-illustration-modern.png" alt="Modern illustration of Hirfa Platform" class="img-fluid rounded-3 shadow-lg" />
+                <!-- Example placeholder: https://images.unsplash.com/photo-1556761175-5973dc0f32e7?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80 -->
+            </div>
+            <div class="col-lg-6" data-aos="fade-left" data-aos-delay="200">
+                <h3 class="mb-3" style="font-weight: 600;">Empowering Connections, Driving Success</h3>
+                <p>Our core mission is to foster a thriving ecosystem where individuals and businesses can effortlessly connect. Hirfa provides the tools and trust needed for clients to find ideal solutions and for professionals to showcase their talents and grow their ventures.</p>
+                <ul class="list-unstyled mt-4">
+                    <li class="mb-3 d-flex align-items-start">
+                        <svg class="me-2 mt-1 flex-shrink-0" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="fill: #2575fc;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                        <span>Intuitive service discovery and effortless booking process.</span>
+                    </li>
+                    <li class="mb-3 d-flex align-items-start">
+                         <svg class="me-2 mt-1 flex-shrink-0" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="fill: #2575fc;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                        <span>Access to a curated network of verified and highly skilled professionals.</span>
+                    </li>
+                    <li class="d-flex align-items-start">
+                         <svg class="me-2 mt-1 flex-shrink-0" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="fill: #2575fc;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                        <span>A secure and transparent environment for all communications and transactions.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section id="how-it-works" class="section-padding bg-light-custom">
+    <div class="container">
+        <div class="section-title" data-aos="fade-up">
+            <h2>How Hirfa <span class="text-gradient-primary">Works</span></h2>
+            <p class="subtitle">Experience the simplicity of Hirfa. In just a few steps, you can be on your way to finding or providing exceptional services.</p>
+        </div>
+        <div class="row text-center g-4 g-lg-5">
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                <div class="how-it-works-step">
+                    <div class="icon-container">
+                        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                    </div>
+                    <h4>1. Register & Profile</h4>
+                    <p>Join Hirfa by choosing your role and crafting a compelling profile to showcase yourself or your needs.</p>
+                </div>
+            </div>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="how-it-works-step">
+                    <div class="icon-container">
+                        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5C16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    </div>
+                    <h4>2. Discover or List</h4>
+                    <p>Clients: Browse a vast catalog of services. Providers: List your expertise and attract opportunities.</p>
+                </div>
+            </div>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                <div class="how-it-works-step">
+                    <div class="icon-container">
+                        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M21.99 4c0-1.1-.89-2-1.99-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14l4 4-.01-18zM18 14H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+                    </div>
+                    <h4>3. Connect & Grow</h4>
+                    <p>Engage through secure messaging, manage projects efficiently, and build lasting professional relationships.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Key Features Section -->
+<section id="features" class="section-padding">
+    <div class="container">
+        <div class="section-title" data-aos="fade-up">
+            <h2>Why <span class="text-gradient-primary">Hirfa</span> Stands Out</h2>
+            <p class="subtitle">Discover the powerful features that make Hirfa the preferred platform for services.</p>
+        </div>
+        <div class="row g-4 g-lg-5">
+            <div class="col-lg-4 col-md-6" data-aos="zoom-in-up" data-aos-delay="100">
+                <div class="feature-card">
+                    <div class="icon-feature">
+                        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+                    </div>
+                    <h4>Robust Security</h4>
+                    <p>Your safety is paramount. We employ advanced security measures and profile verification.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="zoom-in-up" data-aos-delay="200">
+                <div class="feature-card">
+                    <div class="icon-feature">
+                        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M19.35 10.04A7.49 7.49 0 0012 4C9.11 4 6.6 5.64 5.35 8.04A5.471 5.471 0 000 13.5C0 16.54 2.46 19 5.5 19h13c2.48 0 4.5-2.02 4.5-4.5a4.5 4.5 0 00-3.65-4.46zM14 13v4h-4v-4H7l5-5 5 5h-3z"/></svg>
+                    </div>
+                    <h4>Seamless Management</h4>
+                    <p>Integrated tools for project tracking, communication, and payments, all in one dashboard.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6" data-aos="zoom-in-up" data-aos-delay="300">
+                <div class="feature-card">
+                    <div class="icon-feature">
+                        <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M16.5 12c1.38 0 2.5-1.12 2.5-2.5S17.88 7 16.5 7C15.12 7 14 8.12 14 9.5s1.12 2.5 2.5 2.5zM9 11c1.66 0 2.99-1.34 2.99-3S10.66 5 9 5C7.34 5 6 6.34 6 8s1.34 3 3 3zm7.5 3c-1.83 0-5.5.92-5.5 2.75V19h11v-2.25c0-1.83-3.67-2.75-5.5-2.75zM9 13c-2.33 0-7 1.17-7 3.5V19h7v-2.5c0-.85.33-2.34 2.37-3.47C10.5 13.1 9.67 13 9 13z"/></svg>
+                    </div>
+                    <h4>Vibrant Community</h4>
+                    <p>Join a diverse network of passionate clients and talented professionals eager to collaborate.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Join Us Section -->
+<section id="join-us" class="section-padding bg-dark-subtle-custom">
+    <div class="container">
+        <div class="section-title" data-aos="fade-up">
+            <h2 style="color: #fff;">Become Part of <span class="text-gradient-primary">Hirfa</span> Today</h2>
+            <p class="subtitle" style="color: #bdc3c7;">Choose your path and unlock a world of opportunities. Signing up is quick, easy, and the first step towards your next big thing.</p>
+        </div>
+        <div class="row g-4 justify-content-center">
+            <!-- Client Card -->
+            <div class="col-lg-3 col-md-6" data-aos="flip-left" data-aos-delay="100">
+                <div class="role-card">
+                    <div class="role-image-container">
+                        <!-- SUGGESTION: Use a high-quality, professional image or illustration representing a client -->
+                        <img src="/img/role-client-modern.jpg" alt="Client using Hirfa platform">
+                        <!-- Example: https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80 -->
+                    </div>
+                    <div class="role-content">
+                        <h4>I'm a Client</h4>
+                        <p>Looking to hire top talent? Find skilled professionals for any project, big or small.</p>
+                        <a asp-controller="Client" asp-action="RegisterClient" class="btn btn-modern btn-modern-primary mt-auto">Sign Up as Client</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Client Card -->
+            <div class="col-lg-3 col-md-6" data-aos="flip-left" data-aos-delay="200">
+                 <div class="role-card">
+                    <div class="role-image-container">
+                        <!-- SUGGESTION: Image representing a business or someone managing larger projects -->
+                        <img src="/img/role-service-client-modern.jpg" alt="Business client managing services">
+                        <!-- Example: https://images.unsplash.com/photo-1573496130141-209d200cee78?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80 -->
+                    </div>
+                    <div class="role-content">
+                        <h4>I'm a Service Client</h4>
+                        <p>Need specialized or ongoing services? Connect with providers offering tailored solutions.</p>
+                        <a asp-controller="ServiceClient" asp-action="RegisterServiceClient" class="btn btn-modern btn-modern-primary mt-auto">Sign Up as Service Client</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prestataire Card -->
+            <div class="col-lg-3 col-md-6" data-aos="flip-left" data-aos-delay="300">
+                <div class="role-card">
+                    <div class="role-image-container">
+                        <!-- SUGGESTION: Image of a skilled professional at work or a portfolio showcase -->
+                        <img src="/img/role-prestataire-modern.jpg" alt="Skilled service provider (Prestataire)">
+                         <!-- Example: https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80 -->
+                    </div>
+                    <div class="role-content">
+                        <h4>I'm a Prestataire</h4>
+                        <p>Offer your expertise, find exciting projects, and expand your professional reach.</p>
+                        <a asp-controller="Prestataire" asp-action="RegisterPrestataireDemande" class="btn btn-modern btn-modern-primary mt-auto">Sign Up as Prestataire</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Card (Consider visibility/access control) -->
+            <div class="col-lg-3 col-md-6" data-aos="flip-left" data-aos-delay="400">
+                <div class="role-card">
+                     <div class="role-image-container">
+                        <!-- SUGGESTION: Abstract image representing control, management, or system architecture -->
+                        <img src="/img/role-admin-modern.jpg" alt="Platform Administrator">
+                        <!-- Example: https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80 -->
+                    </div>
+                    <div class="role-content">
+                        <h4>I'm an Admin</h4>
+                        <p>Oversee platform operations, support users, and ensure Hirfa runs smoothly.</p>
+                        <a asp-controller="Admin" asp-action="RegisterAdmin" class="btn btn-modern btn-modern-primary mt-auto">Sign Up as Admin</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+@*
+IMPORTANT NOTES FOR YOU (UPDATED):
+
+1.  AOS (Animate On Scroll) LIBRARY:
+    *   Make sure you've added the AOS CSS link in `<head>` and JS script + init before `</body>` as instructed at the top of this response.
+    *   Elements now have `data-aos="animation-type"` and optional `data-aos-delay="ms"` attributes.
+
+2.  FONTS:
+    *   I've added 'Inter' to the font stack: `font-family: 'Poppins', 'Inter', ...;`.
+        To use Inter, include it from Google Fonts in your `_Layout.cshtml` `<head>` (similar to Poppins):
+        `<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">`
+
+3.  IMAGES & SVGs:
+    *   Hero Background: `url('/img/hero-background-abstract.jpg')`. Replace with a high-quality, abstract, or subtly tech-themed background image. I've also commented out an example of an animated gradient if you prefer that (requires un-commenting CSS).
+    *   About Section Image: `src="/img/about-hirfa-illustration-modern.png"`. Use a modern, relevant illustration or high-quality photo.
+    *   Role Card Images: e.g., `src="/img/role-client-modern.jpg"`. **These are CRITICAL for the visual appeal.** Invest in good quality, professional, and distinct images/illustrations for each role. The `object-fit: cover` style will help them fit nicely.
+    *   SVG Icons: I've embedded some basic SVGs directly into the HTML for the "How It Works", "About" list, and "Features" sections. You can:
+        *   Keep them embedded.
+        *   Replace them with your own custom SVGs.
+        *   Save them as separate `.svg` files in `wwwroot/img/icons/` and reference them like `<img src="/img/icons/my-icon.svg" alt="icon">`. This is often cleaner for complex SVGs.
+    *   Footer Heart: Replaced Font Awesome heart with an embedded SVG.
+
+4.  COLORS & STYLING:
+    *   The color palette has been slightly refined. Adjust gradients and theme colors in the CSS as needed.
+    *   The `bg-dark-subtle-custom` class offers a premium feel for the "Join Us" section.
+
+5.  ADMIN REGISTRATION:
+    *   Reminder: Publicly accessible admin registration (`RegisterAdmin`) is generally a security risk.
+
+This version aims for a more polished, dynamic, and visually engaging "modern UI" with an emphasis on high-quality imagery and smooth animations.
+*@

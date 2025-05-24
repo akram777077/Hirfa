@@ -32,6 +32,8 @@ public partial class Demandeprestataire
 
     public string? Reason { get; set; } // Reason for non valid status
 
+    public string Sexe { get; set; } = null!;
+
     public virtual ICollection<Diplomedemande> Diplomedemandes { get; set; } = new List<Diplomedemande>();
 
     public virtual ICollection<Prestataire> Prestataires { get; set; } = new List<Prestataire>();

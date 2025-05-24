@@ -1,0 +1,407 @@
+@model Hirfa.Web.ViewModels.PrestataireDemandeDetailViewModel
+@{
+    ViewData["Title"] = "Prestataire Demand Details";
+}
+
+<style>
+    /* Styles specific to detail pages - can be in site.css */
+    .page-content-container {
+        padding-top: 1.5rem;
+        padding-bottom: 3rem;
+        background-color: #f8f9fa; /* Light background for the whole page */
+    }
+
+    .detail-header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .detail-header h1 {
+        font-size: 2rem;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    .detail-header .header-actions {
+        /* For placing back button or other primary actions */
+    }
+
+    .detail-card {
+        border-radius: 0.75rem;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+        border: none;
+        margin-bottom: 1.5rem;
+        background-color: #fff;
+    }
+    .detail-card .card-header {
+        background-color: #f8f9fa; /* Light header for cards */
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: #343a40;
+        padding: 0.85rem 1.25rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+     .detail-card .card-header .bi { /* Icon in card header */
+        margin-right: 0.5rem;
+        color: #2575fc; /* Theme color for icons */
+     }
+
+    .detail-card .card-body {
+        padding: 1.25rem 1.5rem;
+    }
+    
+    .detail-list {
+        font-size: 0.95rem;
+    }
+    .detail-list dt { /* Definition Term */
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.3rem;
+    }
+    .detail-list dd { /* Definition Description */
+        margin-left: 0; /* Reset default margin */
+        margin-bottom: 0.8rem;
+        color: #212529;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px dashed #e0e5eb; /* Dashed separator */
+    }
+    .detail-list dd:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: none;
+    }
+    .detail-list .badge {
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 0.45em 0.8em;
+    }
+    .detail-list .download-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: #2575fc;
+        font-weight: 500;
+        text-decoration: none;
+        padding: 0.25rem 0;
+    }
+    .detail-list .download-link .bi {
+        font-size: 1.1rem;
+    }
+    .detail-list .download-link:hover {
+        text-decoration: underline;
+        color: #0b5ed7;
+    }
+    .detail-list .text-muted-placeholder {
+        color: #868c96;
+        font-style: italic;
+    }
+
+    .diplomas-table {
+        font-size: 0.9rem;
+    }
+    .diplomas-table thead th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #343a40;
+        border-bottom-width: 2px;
+    }
+    .diplomas-table tbody td {
+        vertical-align: middle;
+    }
+
+    /* --- Styles for the action buttons panel to match the image --- */
+    .action-buttons-panel {
+        padding: 1.5rem; 
+        border-radius: 0.75rem;
+        background-color: #1e2125; /* Very dark background, close to image */
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15); 
+        text-align: center;
+    }
+
+    .action-buttons-panel h5 {
+        color: #ffffff; 
+        font-weight: 600; 
+        font-size: 1.15rem; 
+        margin-bottom: 1.5rem !important; 
+    }
+
+    .action-buttons-panel form,
+    .action-buttons-panel > button[data-bs-toggle="modal"] { 
+        margin-bottom: 0.75rem; 
+    }
+    .action-buttons-panel > button[data-bs-toggle="modal"]:last-child {
+        margin-bottom: 0; 
+    }
+
+    .action-buttons-panel .btn {
+        padding: 0.8rem 1.5rem; 
+        font-weight: 600;
+        font-size: 1rem; 
+        border-radius: 0.375rem; 
+        width: 100%;            
+        display: flex;          
+        align-items: center;
+        justify-content: center;
+        text-transform: capitalize; 
+        border-width: 1px; 
+        transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .action-buttons-panel .btn .bi {
+        margin-right: 0.6rem; 
+        font-size: 1.1em;     
+        position: relative;
+        top: -1px; 
+    }
+
+    .action-buttons-panel .btn-success {
+        background-color: #198754; 
+        border-color: #198754;
+        color: #fff;
+    }
+    .action-buttons-panel .btn-success:hover {
+        background-color: #157347;
+        border-color: #146c43;
+        transform: translateY(-2px);
+    }
+
+    .action-buttons-panel .btn-danger {
+        background-color: #dc3545; 
+        border-color: #dc3545;
+        color: #fff;
+    }
+    .action-buttons-panel .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+        transform: translateY(-2px);
+    }
+    /* --- End of action buttons panel styles --- */
+    
+    .modal-modern .modal-content {
+        border-radius: 0.75rem;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    .modal-modern .modal-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        padding: 1rem 1.25rem;
+    }
+    .modal-modern .modal-title {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    .modal-modern .modal-body {
+        padding: 1.25rem 1.5rem;
+    }
+    .modal-modern .form-control { /* Style textarea in modal */
+        border-radius: 0.5rem;
+        border: 1px solid #ced4da;
+        font-size: 0.95rem;
+    }
+    .modal-modern .form-control:focus {
+        border-color: #dc3545; /* Danger color for reject reason */
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.2);
+    }
+    .modal-modern .modal-footer {
+        background-color: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        padding: 0.75rem 1.25rem;
+    }
+</style>
+
+<div class="container page-content-container">
+    <div class="detail-header d-flex justify-content-between align-items-center">
+        <h1>Demand Details</h1>
+        <a asp-action="PrestataireDemands" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left-circle me-2"></i>Back to List
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Left Column: Personal & Service Info -->
+        <div class="col-lg-7">
+            <div class="card detail-card">
+                <div class="card-header">
+                    <i class="bi bi-person-badge-fill"></i> Prestataire Information
+                </div>
+                <div class="card-body">
+                    <dl class="detail-list">
+                        <dt>Full Name</dt>
+                        <dd>@Model.Prenom @Model.Nom</dd>
+
+                        <dt>Email Address</dt>
+                        <dd>@Model.Email</dd>
+
+                        <dt>Phone Number</dt>
+                        <dd>@Model.Numtel</dd>
+
+                        <dt>Date of Birth</dt>
+                        <dd>@Model.Datenaissance?.ToString("dd MMMM yyyy")</dd>
+
+                        <dt>Address</dt>
+                        <dd>@Model.Adresse</dd>
+
+                        <dt>NIN (National ID)</dt>
+                        <dd>@Model.Nin</dd>
+
+                        <dt>Gender</dt>
+                        <dd>
+                            @(Model.Sexe == "M" ? "Male" : Model.Sexe == "F" ? "Female" : Model.Sexe == "O" ? "Other" : Model.Sexe == "N" ? "Prefer not to say" : "Not Specified")
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card detail-card">
+                 <div class="card-header">
+                    <i class="bi bi-briefcase-fill"></i> Service Details
+                </div>
+                <div class="card-body">
+                    <dl class="detail-list">
+                        <dt>Type of Service Offered</dt>
+                        <dd>@Model.Typeservice</dd>
+
+                        <dt>Application Status</dt>
+                        <dd>
+                            <span class="badge @(Model.Etat.Equals("pending", StringComparison.OrdinalIgnoreCase) ? "bg-warning text-dark" : Model.Etat.Equals("valide", StringComparison.OrdinalIgnoreCase) ? "bg-success" : Model.Etat.Equals("non valide", StringComparison.OrdinalIgnoreCase) ? "bg-danger" : "bg-secondary")">
+                                @Model.Etat
+                            </span>
+                        </dd>
+
+                        @if (Model.Etat.Equals("non valide", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(Model.Reason)) {
+                            <dt>Reason for Rejection</dt>
+                            <dd><span class="text-danger fw-bold">@Model.Reason</span></dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Documents & Actions -->
+        <div class="col-lg-5">
+            <div class="card detail-card">
+                 <div class="card-header">
+                    <i class="bi bi-file-earmark-text-fill"></i> Submitted Documents
+                </div>
+                <div class="card-body">
+                    <dl class="detail-list">
+                        <dt>Curriculum Vitae (CV)</dt>
+                        <dd>
+                            @if (!string.IsNullOrEmpty(Model.Cv)) {
+                                <a href="~/uploads/@Model.Cv" target="_blank" class="download-link"><i class="bi bi-cloud-arrow-down-fill"></i> Download CV</a>
+                            } else {
+                                <span class="text-muted-placeholder">- Not Provided -</span>
+                            }
+                        </dd>
+
+                        <dt>Criminal Record Extract</dt>
+                        <dd>
+                             @if (!string.IsNullOrEmpty(Model.Casierjudiciaire)) {
+                                <a href="~/uploads/@Model.Casierjudiciaire" target="_blank" class="download-link"><i class="bi bi-cloud-arrow-down-fill"></i> Download Record</a>
+                            } else {
+                                <span class="text-muted-placeholder">- Not Provided -</span>
+                            }
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+                <div class="action-buttons-panel">
+                    <h5>Manage Application Status</h5>
+                    
+                    <form asp-action="AcceptDemandePrestataire" asp-controller="ServiceClient" method="post">
+                        <input type="hidden" name="id" value="@Model.Iddemandeprestataire" />
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle-fill"></i> Validate
+                        </button>
+                    </form>
+
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#reasonModal_@Model.Iddemandeprestataire">
+                        <i class="bi bi-x-circle-fill"></i> Reject
+                    </button>
+                </div>
+        </div>
+    </div>
+
+    <!-- Diplomas Section -->
+    @if (Model.Diplomes != null && Model.Diplomes.Any())
+    {
+        <div class="card detail-card">
+            <div class="card-header">
+                <i class="bi bi-award-fill"></i> Diplomas & Certifications
+            </div>
+            <div class="card-body p-0"> 
+                <div class="table-responsive">
+                    <table class="table diplomas-table mb-0 table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Institution</th>
+                                <th>Degree/Type</th>
+                                <th class="text-center">Year Obtained</th>
+                                <th class="text-center">Attachment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var d in Model.Diplomes)
+                        {
+                            <tr>
+                                <td>@d.Institution</td>
+                                <td>@d.Type</td>
+                                <td class="text-center">@d.Anneeobtention</td>
+                                <td class="text-center">
+                                    @if (!string.IsNullOrEmpty(d.Fiche)) {
+                                        <a href="~/uploads/@d.Fiche" target="_blank" class="download-link"><i class="bi bi-file-earmark-pdf-fill"></i> View</a>
+                                    } else {
+                                        <span class="text-muted-placeholder">-</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+         <div class="card detail-card">
+            <div class="card-header">
+                <i class="bi bi-award-fill"></i> Diplomas & Certifications
+            </div>
+            <div class="card-body text-center text-muted py-4">
+                <i class="bi bi-info-circle" style="font-size: 1.5rem;"></i>
+                <p class="mb-0 mt-2">No diplomas or certifications were submitted with this application.</p>
+            </div>
+        </div>
+    }
+
+
+    <!-- Modal for entering reason -->
+    <div class="modal fade modal-modern" id="reasonModal_@Model.Iddemandeprestataire" tabindex="-1" aria-labelledby="reasonModalLabel_@Model.Iddemandeprestataire" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form asp-action="RejectDemandePrestataire" asp-controller="ServiceClient" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="reasonModalLabel_@Model.Iddemandeprestataire"><i class="bi bi-journal-x me-2"></i>Reason for Rejection</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="id" value="@Model.Iddemandeprestataire" />
+                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                        <div class="mb-0"> 
+                            <label for="reasonInput_@Model.Iddemandeprestataire" class="form-label">Please provide a clear reason for rejecting this application:</label>
+                            <textarea class="form-control" id="reasonInput_@Model.Iddemandeprestataire" name="reason" rows="4" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger"><i class="bi bi-send-fill me-1"></i>Submit Rejection</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

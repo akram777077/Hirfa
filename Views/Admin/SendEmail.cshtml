@@ -1,0 +1,82 @@
+@{
+    Layout = null;
+    var mailtoUri = ViewData["MailtoUri"] as string;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Send Email</title>
+    @if (!string.IsNullOrEmpty(mailtoUri))
+    {
+        <script type="text/javascript">
+            window.onload = function() {
+                const mailtoLink = '@Html.Raw(mailtoUri)';
+                
+                // Show manual link immediately for better user experience
+                document.getElementById('manualLink').style.display = 'block';
+                
+                // Try to open email client with user interaction simulation
+                setTimeout(function() {
+                    try {
+                        // Method 1: Create a visible link and auto-click it
+                        const link = document.createElement('a');
+                        link.href = mailtoLink;
+                        link.target = '_self';
+                        link.style.position = 'absolute';
+                        link.style.left = '-9999px';
+                        document.body.appendChild(link);
+                        
+                        // Simulate user click
+                        const clickEvent = new MouseEvent('click', {
+                            bubbles: true,
+                            cancelable: true,
+                            view: window
+                        });
+                        link.dispatchEvent(clickEvent);
+                        
+                        // Clean up
+                        setTimeout(() => document.body.removeChild(link), 100);
+                        
+                    } catch (e) {
+                        console.log('Auto-open failed - user must click manually');
+                    }
+                }, 500);
+            };
+            
+            function openEmail() {
+                const mailtoLink = '@Html.Raw(mailtoUri)';
+                window.open(mailtoLink, '_self');
+                return false;
+            }
+        </script>
+    }
+</head>
+<body>
+    @if (!string.IsNullOrEmpty(mailtoUri))
+    {
+        <div style="text-align: center; padding: 20px; font-family: Arial, sans-serif;">
+            <h2>Send Email</h2>
+            <p>Click the button below to open your email client:</p>
+            <button onclick="openEmail()" style="background-color: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin: 10px;">
+                Open Email Client
+            </button>
+            <div id="manualLink" style="margin-top: 20px;">
+                <p>Or <a href="@mailtoUri" style="color: #007bff; text-decoration: none;">click this link</a> to open your email client.</p>
+            </div>
+            <div style="margin-top: 20px; font-size: 12px; color: #666;">
+                <p><strong>Note:</strong> If your email client doesn't open:</p>
+                <ul style="text-align: left; display: inline-block;">
+                    <li>Make sure you have an email client installed (Outlook, Mail app, etc.)</li>
+                    <li>Check if your browser is blocking pop-ups</li>
+                    <li>Try copying the email details manually</li>
+                </ul>
+            </div>
+        </div>
+    }
+    else
+    {
+        <p>An error occurred, or the email link could not be generated. Please check your email manually or contact support.</p>
+    }
+</body>
+</html>

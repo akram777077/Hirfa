@@ -1,0 +1,184 @@
+@model Hirfa.Web.ViewModels.AdminRegisterViewModel
+@{
+    ViewData["Title"] = "Create Admin Account";
+}
+
+<style>
+    /* Styles specific to the Auth pages (can be shared with Login, RegisterClient etc.) */
+    /* These styles should ideally be in your site.css or a dedicated auth.css */
+    .auth-page-container {
+        min-height: 85vh;
+        background-color: #f0f2f5; /* Consistent light grey */
+        padding-top: 2rem; /* Add some padding if content is very tall */
+        padding-bottom: 2rem;
+    }
+
+    .auth-card {
+        max-width: 550px; /* Admins might have more fields eventually, or just for balance */
+        width: 100%;
+        background-color: #fff;
+        border-radius: 1rem;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
+        padding: 2.5rem;
+        border: none;
+    }
+
+    .auth-card .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .auth-card .auth-header h2 {
+        font-weight: 700;
+        color: #2c3e50;
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+    .auth-card .auth-header p {
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+
+    .auth-card .form-label {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #495057;
+        margin-bottom: 0.3rem;
+    }
+
+    .auth-card .form-control {
+        border-radius: 0.5rem;
+        border: 1px solid #ced4da;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        background-color: #f8f9fa;
+    }
+    .auth-card .form-control:focus {
+        border-color: #198754; /* Using Bootstrap's success green for Admin focus */
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.2);
+        background-color: #fff;
+    }
+
+    .auth-card .btn-submit-auth { /* General class for auth submit buttons */
+        border-radius: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #fff;
+        transition: all 0.3s ease;
+    }
+    .auth-card .btn-submit-auth.btn-success { /* For admin signup, using success green */
+        background: #198754; /* Bootstrap success green */
+        border-color: #198754;
+        box-shadow: 0 4px 15px rgba(25, 135, 84, 0.2);
+    }
+     .auth-card .btn-submit-auth.btn-success:hover {
+        background: #157347;
+        border-color: #146c43;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(25, 135, 84, 0.35);
+    }
+
+    .auth-card .alert-danger {
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        padding: 0.8rem 1rem;
+        background-color: #f8d7da;
+        color: #721c24;
+        border-color: #f5c6cb;
+    }
+     .auth-card .alert-danger ul {
+        margin-bottom: 0;
+        padding-left: 1.2rem; /* Indent list items */
+    }
+    .auth-card .alert-danger li {
+        margin-bottom: 0.25rem;
+    }
+     .auth-card .alert-danger li:last-child {
+        margin-bottom: 0;
+    }
+
+    .auth-card .login-link-container {
+        text-align: center;
+        margin-top: 1.5rem;
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    .auth-card .login-link-container a {
+        color: #2575fc; /* Theme primary color */
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .auth-card .login-link-container a:hover {
+        text-decoration: underline;
+    }
+
+    .auth-card .text-danger { /* For asp-validation-for spans */
+        font-size: 0.8em; /* Smaller validation text */
+        display: block; /* Ensure it takes its own line if needed */
+        margin-top: 0.2rem;
+    }
+</style>
+
+<div class="container-fluid auth-page-container d-flex align-items-center justify-content-center py-5">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h2>Admin Account Creation</h2>
+            <p>Please fill in the details to create a new administrator account.</p>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+        {
+            <div class="alert alert-danger" role="alert">
+                <h5 class="alert-heading" style="font-size: 1rem; margin-bottom: 0.5rem;"><i class="bi bi-exclamation-triangle-fill me-2"></i>Please correct the following errors:</h5>
+                <ul>
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+                </ul>
+            </div>
+        }
+
+        <form asp-action="RegisterAdmin" asp-controller="Admin" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="role" value="Admin" />
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" placeholder="admin@example.com" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" class="form-control" type="password" placeholder="Enter a strong password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+
+            
+            @* Optional: AdminKey field if your registration logic requires it
+            <div class="mb-3">
+                <label asp-for="AdminKey" class="form-label"></label>
+                <input asp-for="AdminKey" class="form-control" placeholder="Enter Admin Registration Key" />
+                <span asp-validation-for="AdminKey" class="text-danger"></span>
+            </div>
+            *@
+
+            <button type="submit" class="btn btn-submit-auth btn-success w-100 mt-2">Create Admin Account</button>
+        </form>
+
+        <div class="login-link-container">
+            <span>Already have an account or need to login as a different user?</span>
+            <a asp-controller="Account" asp-action="Login">Login Here</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
