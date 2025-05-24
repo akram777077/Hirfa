@@ -13,7 +13,7 @@ namespace Hirfa.Web.Controllers
         public ServiceClientController(HirfaDbContext context) { _context = context; }
 
         [HttpGet]
-        public IActionResult RegisterServiceClient() => View("RegisterServiceClient");
+        public IActionResult RegisterServiceClient() => View("~/Views/ServiceClient/Register.cshtml");
 
         [HttpPost]
         public async Task<IActionResult> RegisterServiceClient(ServiceClientRegisterViewModel serviceClientModel)
@@ -33,11 +33,11 @@ namespace Hirfa.Web.Controllers
             foreach (var key in keysToRemove)
                 ModelState.Remove(key);
             if (!ModelState.IsValid)
-                return View("RegisterServiceClient", serviceClientModel);
+                return View("~/Views/ServiceClient/Register.cshtml", serviceClientModel);
             if (_context.Comptes.Any(c => c.Email == serviceClientModel.Email))
             {
                 TempData["ErrorToast"] = "Email is already in use.";
-                return View("RegisterServiceClient", serviceClientModel);
+                return View("~/Views/ServiceClient/Register.cshtml", serviceClientModel);
             }
             var compte = new Hirfa.Web.Models.Compte
             {
@@ -59,14 +59,14 @@ namespace Hirfa.Web.Controllers
             _context.Serviceclients.Add(serviceclient);
             await _context.SaveChangesAsync();
             TempData["SuccessToast"] = "Account created successfully. Please log in.";
-            return View("RegisterServiceClient");
+            return View("~/Views/Account/Login.cshtml", serviceClientModel);
         }
 
         [HttpGet]
         public IActionResult ServiceClientDashboard()
         {
             ViewBag.Demandeclients = _context.Demandeclients.ToList();
-            return View("~/Views/ServiceClient/ServiceClientDashboard.cshtml");
+            return View("~/Views/ServiceClient/Dashboard.cshtml");
         }
 
         [HttpPost]
@@ -91,6 +91,34 @@ namespace Hirfa.Web.Controllers
             _context.SaveChanges();
             TempData["SuccessToast"] = "Demande rejected and status set to NonValide.";
             return RedirectToAction("ServiceClientDashboard");
+        }
+        [HttpPost]
+        public IActionResult AcceptDemandePrestataire(int id, string returnUrl)
+        {
+            var demande = _context.Demandeprestataires.FirstOrDefault(d => d.Iddemandeprestataire == id);
+            if (demande == null)
+                return NotFound();
+            demande.Etat = "valide";
+            demande.Reason = null;
+            _context.SaveChanges();
+            TempData["SuccessToast"] = "Demande accepted and status set to Valide.";
+            if (!string.IsNullOrEmpty(returnUrl))
+                return Redirect(returnUrl);
+            return RedirectToAction("PrestataireDemands", "Prestataire");
+        }
+        [HttpPost]
+        public IActionResult RejectDemandePrestataire(int id, string reason, string returnUrl)
+        {
+            var demande = _context.Demandeprestataires.FirstOrDefault(d => d.Iddemandeprestataire == id);
+            if (demande == null)
+                return NotFound();
+            demande.Etat = "non valide";
+            demande.Reason = reason;
+            _context.SaveChanges();
+            TempData["SuccessToast"] = "Demande rejected and status set to Non Valide.";
+            if (!string.IsNullOrEmpty(returnUrl))
+                return Redirect(returnUrl);
+            return RedirectToAction("PrestataireDemands");
         }
     }
 }

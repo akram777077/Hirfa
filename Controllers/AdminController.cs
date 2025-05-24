@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 using Hirfa.Web.ViewModels;
 using System.Linq;
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
+using System.Net.Mail;
 
 namespace Hirfa.Web.Controllers
 {
@@ -13,7 +16,40 @@ namespace Hirfa.Web.Controllers
         public AdminController(HirfaDbContext context) { _context = context; }
 
         [HttpGet]
-        public IActionResult RegisterAdmin() => View("RegisterAdmin");
+        public IActionResult RegisterAdmin() => View("~/Views/Admin/Register.cshtml");
+
+        [HttpPost]
+        public IActionResult RegisterAdmin(AdminRegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("~/Views/Admin/Register.cshtml", model);
+            }
+
+            if (_context.Comptes.Any(c => c.Email == model.Email))
+            {
+                ModelState.AddModelError("Email", "An account with this email already exists.");
+                return View("~/Views/Admin/Register.cshtml", model);
+            }
+
+            var compte = new Hirfa.Web.Models.Compte
+            {
+                Email = model.Email,
+                Motdepasse = model.Password
+            };
+            _context.Comptes.Add(compte);
+            _context.SaveChanges();
+
+            var admin = new Hirfa.Web.Models.Admin
+            {
+                Idcompte = compte.Idcompte
+            };
+            _context.Admins.Add(admin);
+            _context.SaveChanges();
+
+            TempData["SuccessToast"] = "Admin registered successfully.";
+            return RedirectToAction("Login", "Account");
+        }
 
         [HttpGet]
         public IActionResult AdminDashboard(string? status = null)
@@ -36,20 +72,22 @@ namespace Hirfa.Web.Controllers
                     Reason = d.Reason ?? string.Empty // Prevent null
                 })
                 .ToList();
-            return View("~/Views/Admin/AdminDashboard.cshtml", demandes ?? new List<Hirfa.Web.ViewModels.PrestataireDemandeDetailViewModel>());
+            return View("~/Views/Admin/Dashboard.cshtml", demandes ?? new List<Hirfa.Web.ViewModels.PrestataireDemandeDetailViewModel>());
         }
 
         [HttpPost]
         public async Task<IActionResult> CreatePrestataireAccount(int id, string password)
         {
             var demande = _context.Demandeprestataires.FirstOrDefault(d => d.Iddemandeprestataire == id);
-            if (demande == null || demande.Etat != Hirfa.Web.Models.DemandeclientStatus.Valide.ToString())
+            if (demande == null || demande.Etat != "valide")
                 return NotFound();
+
             if (_context.Comptes.Any(c => c.Email == demande.Email))
             {
                 TempData["ErrorToast"] = "An account with this email already exists.";
                 return RedirectToAction("AdminDashboard");
             }
+
             // Create Compte
             var compte = new Hirfa.Web.Models.Compte
             {
@@ -57,7 +95,8 @@ namespace Hirfa.Web.Controllers
                 Motdepasse = password
             };
             _context.Comptes.Add(compte);
-            await _context.SaveChangesAsync();
+           await _context.SaveChangesAsync();
+
             // Create Prestataire
             var prestataire = new Hirfa.Web.Models.Prestataire
             {
@@ -76,12 +115,21 @@ namespace Hirfa.Web.Controllers
                 Iddemandeprestataire = demande.Iddemandeprestataire
             };
             _context.Prestataires.Add(prestataire);
-            // Set demand status to 'final valide' (strong typing)
+
+            // Update demand status to 'final valide'
             demande.Etat = "final valide";
-            await _context.SaveChangesAsync();
-            // Redirect to Gmail with password in body
-            var gmailUrl = $"https://mail.google.com/mail/?view=cm&fs=1&to={demande.Email}&su=Your account has been created&body=Your account has been created and your password is: {System.Net.WebUtility.UrlEncode(password)}";
-            return Redirect(gmailUrl);
+           await _context.SaveChangesAsync();
+
+            // Use Uri.EscapeDataString instead of WebUtility.UrlEncode
+            var subject = Uri.EscapeDataString("Account Created");
+            var body = Uri.EscapeDataString($"Your account has been created. Your password is: {password ?? ""}");
+            var mailtoUri = $"mailto:{demande.Email}?subject={subject}&body={body}";
+
+            TempData["SuccessToast"] = "Account created successfully, and demand status updated to 'final valide'.";
+
+            // Pass mailto URI to the view
+            ViewData["MailtoUri"] = mailtoUri;
+            return View("SendEmail");
         }
 
         [HttpPost]
@@ -90,26 +138,21 @@ namespace Hirfa.Web.Controllers
             var demande = _context.Demandeprestataires.FirstOrDefault(d => d.Iddemandeprestataire == id);
             if (demande == null)
                 return NotFound();
+
             demande.Etat = "final non valide";
             // Do not overwrite Reason, keep the existing one from service client
-            _context.SaveChanges();
-            TempData["SuccessToast"] = "Demande prestataire rejected and status set to final non valide.";
-            return RedirectToAction("AdminDashboard");
-        }
+            //_context.SaveChanges();
 
-        [HttpPost]
-        public IActionResult AcceptDemandePrestataire(int id, string returnUrl)
-        {
-            var demande = _context.Demandeprestataires.FirstOrDefault(d => d.Iddemandeprestataire == id);
-            if (demande == null)
-                return NotFound();
-            demande.Etat = "valide";
-            demande.Reason = null;
-            _context.SaveChanges();
-            TempData["SuccessToast"] = "Demande accepted and status set to Valide.";
-            if (!string.IsNullOrEmpty(returnUrl))
-                return Redirect(returnUrl);
-            return RedirectToAction("PrestataireDemands", "Prestataire");
+            // Generate mailto URI for rejection with reason in the subject
+            var subject = Uri.EscapeDataString($"Hirfa: Account Rejected");
+            var body = Uri.EscapeDataString($"Dear {demande.Nom + " " + demande.Prenom}.\nYour account request has been rejected.\nReason: {demande.Reason ?? "Nothing"}.\nPlease contact support for more details.");
+            var mailtoUri = $"mailto:{demande.Email}?subject={subject}&body={body}";
+
+            TempData["SuccessToast"] = "Demande prestataire rejected and status set to final non valide. Email link generated.";
+
+            // Pass mailto URI to the view
+            ViewData["MailtoUri"] = mailtoUri;
+            return View("SendEmail");
         }
     }
 }

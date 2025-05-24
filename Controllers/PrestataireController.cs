@@ -11,7 +11,7 @@ namespace Hirfa.Web.Controllers
         public PrestataireController(HirfaDbContext context) { _context = context; }
 
         [HttpGet]
-        public IActionResult RegisterPrestataireDemande() => View("RegisterPrestataireDemande");
+        public IActionResult RegisterPrestataireDemande() => View("~/Views/Prestataire/Register.cshtml");
 
         [HttpPost]
         public async Task<IActionResult> RegisterPrestataireDemande(PrestataireDemandeViewModel prestataireModel)
@@ -39,14 +39,15 @@ namespace Hirfa.Web.Controllers
                 {
                     if (prestataireModel.Diplomes == null || prestataireModel.Diplomes.Count == 0)
                         prestataireModel.Diplomes = new List<DiplomeDemandeInputModel> { new DiplomeDemandeInputModel() };
-                    return View("RegisterPrestataireDemande", prestataireModel);
+                    return View("~/Views/Prestataire/Register.cshtml", prestataireModel);
                 }
+
                 if (_context.Demandeprestataires.Any(d => d.Email == prestataireModel.Email && d.Etat == "pending") || _context.Comptes.Any(c => c.Email == prestataireModel.Email))
                 {
                     TempData["ErrorToast"] = "A demand or account with this email already exists.";
                     if (prestataireModel.Diplomes == null || prestataireModel.Diplomes.Count == 0)
                         prestataireModel.Diplomes = new List<DiplomeDemandeInputModel> { new DiplomeDemandeInputModel() };
-                    return View("RegisterPrestataireDemande", prestataireModel);
+                    return View("~/Views/Prestataire/Register.cshtml", prestataireModel);
                 }
                 var demandeprestataire = new Hirfa.Web.Models.Demandeprestataire
                 {
@@ -58,7 +59,8 @@ namespace Hirfa.Web.Controllers
                     Nin = prestataireModel.Nin,
                     Typeservice = prestataireModel.Typeservice,
                     Email = prestataireModel.Email,
-                    Etat = "pending"
+                    Etat = "pending",
+                    Sexe = prestataireModel.Sexe,
                 };
                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
                 if (!Directory.Exists(uploadsFolder))
@@ -111,19 +113,19 @@ namespace Hirfa.Web.Controllers
                     await _context.SaveChangesAsync();
                 }
                 TempData["SuccessToast"] = "Demande sent successfully. You will be able to log in once approved.";
-                return View("RegisterPrestataireDemande");
+                return View("~/Views/Account/Login.cshtml");
             }
             catch (Exception ex)
             {
                 ModelState.AddModelError("", $"An error occurred: {ex.Message}");
-                return View("RegisterPrestataireDemande", prestataireModel);
+                return View("~/Views/Prestataire/Register.cshtml", prestataireModel);
             }
         }
 
         [HttpGet]
         public IActionResult PrestataireDashboard()
         {
-            return View("Prestataire/PrestataireDashboard");
+            return View("~/Views/Prestataire/Dashboard.cshtml");
         }
 
         [HttpGet]
@@ -140,7 +142,7 @@ namespace Hirfa.Web.Controllers
                     Etat = d.Etat
                 })
                 .ToList();
-            return View("~/Views/Prestataire/PrestataireDemands.cshtml", demandes);
+            return View("~/Views/Prestataire/Demands.cshtml", demandes);
         }
 
         [HttpGet]
@@ -175,22 +177,7 @@ namespace Hirfa.Web.Controllers
                 .FirstOrDefault();
             if (demande == null)
                 return NotFound();
-            return View("~/Views/Prestataire/PrestataireDemandDetails.cshtml", demande);
-        }
-
-        [HttpPost]
-        public IActionResult RejectDemandePrestataire(int id, string reason, string returnUrl)
-        {
-            var demande = _context.Demandeprestataires.FirstOrDefault(d => d.Iddemandeprestataire == id);
-            if (demande == null)
-                return NotFound();
-            demande.Etat = "non valide";
-            demande.Reason = reason;
-            _context.SaveChanges();
-            TempData["SuccessToast"] = "Demande rejected and status set to Non Valide.";
-            if (!string.IsNullOrEmpty(returnUrl))
-                return Redirect(returnUrl);
-            return RedirectToAction("PrestataireDemands");
+            return View("~/Views/Prestataire/DemandDetails.cshtml", demande);
         }
     }
 }

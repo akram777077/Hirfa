@@ -13,7 +13,7 @@ namespace Hirfa.Web.Controllers
         public ClientController(HirfaDbContext context) { _context = context; }
 
         [HttpGet]
-        public IActionResult RegisterClient() => View("RegisterClient");
+        public IActionResult RegisterClient() => View("~/Views/Client/Register.cshtml");
 
         [HttpPost]
         public async Task<IActionResult> RegisterClient(ClientRegisterViewModel clientModel)
@@ -60,13 +60,13 @@ namespace Hirfa.Web.Controllers
             _context.Clients.Add(client);
             await _context.SaveChangesAsync();
             TempData["SuccessToast"] = "Account created successfully. Please log in.";
-            return View("RegisterClient");
+            return View("~/Views/Client/Register.cshtml", clientModel);
         }
 
         [HttpGet]
         public IActionResult ClientDashboard()
         {
-            return View("~/Views/Client/ClientDashboard.cshtml");
+            return View("~/Views/Client/Dashboard.cshtml");
         }
     }
 }
