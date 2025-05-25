@@ -218,13 +218,20 @@
     <nav class="navbar navbar-expand-lg navbar-dark navbar-modern">
         <div class="container-fluid">
             <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Hirfa.Web</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
             <div class="collapse navbar-collapse" id="navbarNavDropdown">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item"><a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
-                    @if (isLoggedIn && userRole == "serviceclient") {
+                    @if (isLoggedIn && userRole == "client") {
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Prestataire" asp-action="PrestataireDemands">Prestataire Demands</a>
+                            <a class="nav-link" href="/Client/ClientDashboard">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/Client/CreateDemand">Create New Demand</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Client" asp-action="AllDemands">All Demands</a>
                         </li>
                     }
                 </ul>

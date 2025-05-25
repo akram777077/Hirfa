@@ -75,9 +75,9 @@ namespace Hirfa.Web.Controllers
             var demande = _context.Demandeclients.FirstOrDefault(d => d.Iddemandeclient == id);
             if (demande == null)
                 return NotFound();
-            demande.Etat = Hirfa.Web.Models.DemandeclientStatus.Valide;
+            demande.Etat = Hirfa.Web.Models.DemandeclientStatus.Matching;
             _context.SaveChanges();
-            TempData["SuccessToast"] = "Demande accepted and status set to Valide.";
+            TempData["SuccessToast"] = "Demande accepted and status set to Matching.";
             return RedirectToAction("ServiceClientDashboard");
         }
 
@@ -87,9 +87,9 @@ namespace Hirfa.Web.Controllers
             var demande = _context.Demandeclients.FirstOrDefault(d => d.Iddemandeclient == id);
             if (demande == null)
                 return NotFound();
-            demande.Etat = Hirfa.Web.Models.DemandeclientStatus.NonValide;
+            demande.Etat = Hirfa.Web.Models.DemandeclientStatus.NotFound;
             _context.SaveChanges();
-            TempData["SuccessToast"] = "Demande rejected and status set to NonValide.";
+            TempData["SuccessToast"] = "Demande rejected and status set to NotFound.";
             return RedirectToAction("ServiceClientDashboard");
         }
         [HttpPost]

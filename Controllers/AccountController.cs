@@ -56,6 +56,11 @@ namespace Hirfa.Web.Controllers
             {
                 HttpContext.Session.SetString("UserName", compte.Email);
                 HttpContext.Session.SetString("UserRole", "client");
+                var client = _context.Clients.FirstOrDefault(c => c.Idcompte == compte.Idcompte);
+                if (client != null)
+                {
+                    HttpContext.Session.SetInt32("ClientId", client.Idclient);
+                }
                 return RedirectToAction("ClientDashboard", "Client");
             }
             if (_context.Serviceclients.Any(s => s.Idcompte == compte.Idcompte))
