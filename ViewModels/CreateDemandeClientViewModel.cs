@@ -4,6 +4,8 @@ namespace Hirfa.Web.ViewModels
 {
     public class CreateDemandeClientViewModel
     {
+        public int Id { get; set; }
+
         [Required]
         public string Categorie { get; set; } = null!;
 
@@ -16,8 +18,7 @@ namespace Hirfa.Web.ViewModels
         [CustomValidation(typeof(DateValidation), nameof(DateValidation.ValidateNotPastDate))]
         public DateTime Datedebut { get; set; }
 
-        [Required]
         [DataType(DataType.Date)]
-        public DateTime Datefin { get; set; }
+        public DateTime? Datefin { get; set; }
     }
 }

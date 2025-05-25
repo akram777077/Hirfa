@@ -94,18 +94,51 @@ namespace Hirfa.Web.Controllers
             {
                 Categorie = model.Categorie,
                 Description = model.Description,
-                Datedebut = DateOnly.FromDateTime(model.Datedebut),
-                Datefin = DateOnly.FromDateTime(model.Datefin),
+                Datedebut = DateTime.SpecifyKind(model.Datedebut, DateTimeKind.Utc),
+                Datefin = model.Datefin.HasValue ? DateTime.SpecifyKind(model.Datefin.Value, DateTimeKind.Utc) : (DateTime?)null,
                 Idclient = clientId.Value,
-                Datedemande = DateOnly.FromDateTime(DateTime.Now),
+                Datedemande = DateTime.UtcNow, // Save the full date and time
                 Etat = DemandeclientStatus.Pending
             };
 
             _context.Demandeclients.Add(demande);
             await _context.SaveChangesAsync();
 
-            TempData["SuccessToast"] = "Demand created successfully.";
+            TempData["SuccessToast"] = $"Demand created successfully at {demande.Datedemande:yyyy-MM-dd HH:mm:ss}.";
             return RedirectToAction("ClientDashboard");
+        }
+
+        [HttpGet]
+        public IActionResult AllDemands()
+        {
+            var clientId = HttpContext.Session.GetInt32("ClientId");
+            if (clientId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var demands = _context.Demandeclients
+                .Where(d => d.Idclient == clientId.Value)
+                .ToList();
+
+            return View(demands);
+        }
+
+        [HttpGet]
+        public IActionResult CancelDemand(int id)
+        {
+            var demand = _context.Demandeclients.FirstOrDefault(d => d.Iddemandeclient == id);
+            if (demand == null || demand.Etat == DemandeclientStatus.Canceled || demand.Etat == DemandeclientStatus.Complete)
+            {
+                TempData["ErrorToast"] = "Cannot cancel this demand.";
+                return RedirectToAction("AllDemands");
+            }
+
+            demand.Etat = DemandeclientStatus.Canceled;
+            _context.SaveChanges();
+
+            TempData["SuccessToast"] = "Demand canceled successfully.";
+            return RedirectToAction("AllDemands");
         }
     }
 }

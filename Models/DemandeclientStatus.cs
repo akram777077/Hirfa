@@ -3,9 +3,9 @@ namespace Hirfa.Web.Models
     public enum DemandeclientStatus
     {
         Pending,      // Awaiting action
-        Valide,       // Accepted by service
-        NonValide,    // Rejected by service
-        FinalValide,  // Final acceptance (after prestataire validation)
-        FinalNonValide // Final rejection (after prestataire validation)
+        Matching,    // In progress of matching
+        Complete,    // Successfully completed
+        Canceled,    // Canceled by client
+        NotFound     // Demand not found
     }
 }

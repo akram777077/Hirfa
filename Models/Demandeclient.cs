@@ -7,11 +7,11 @@ public partial class Demandeclient
 {
     public int Iddemandeclient { get; set; }
 
-    public DateOnly Datedemande { get; set; }
+    public DateTime Datedemande { get; set; }
 
-    public DateOnly? Datedebut { get; set; }
+    public DateTime Datedebut { get; set; }
 
-    public DateOnly? Datefin { get; set; }
+    public DateTime? Datefin { get; set; }
 
     public DemandeclientStatus Etat { get; set; }
 

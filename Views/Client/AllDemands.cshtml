@@ -1,0 +1,66 @@
+@model IEnumerable<Hirfa.Web.Models.Demandeclient>
+@{
+    ViewData["Title"] = "All Demands";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center">All Demands</h2>
+    <div>
+        <label for="statusFilter">Filter by Status:</label>
+        <select id="statusFilter" onchange="filterDemands()">
+            <option value="">All</option>
+            <option value="Pending">Pending</option>
+            <option value="Matching">Matching</option>
+            <option value="Complete">Complete</option>
+            <option value="Canceled">Canceled</option>
+            <option value="NotFound">Not Found</option>
+        </select>
+    </div>
+    <table class="table table-striped table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Demand Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="demandTable">
+            @foreach (var demand in Model)
+            {
+                <tr data-status="@demand.Etat">
+                    <td>@demand.Categorie</td>
+                    <td>@demand.Description</td>
+                    <td>@demand.Datedebut.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@(demand.Datefin.HasValue ? demand.Datefin.Value.ToString("yyyy-MM-dd HH:mm") : "N/A")</td>
+                    <td>@demand.Datedemande.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>
+                        <span class="badge" style="background-color: @(demand.Etat == DemandeclientStatus.Pending ? "#3c569c" : demand.Etat == DemandeclientStatus.Complete ? "green" : "red"); color: white; border-radius: 10px;">
+                            @demand.Etat
+                        </span>
+                    </td>
+                    <td>
+                        @if (demand.Etat == DemandeclientStatus.Pending)
+                        {
+                            <a asp-action="CancelDemand" asp-route-id="@demand.Iddemandeclient" class="btn btn-danger btn-sm">Cancel</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<script>
+    function filterDemands() {
+        const filter = document.getElementById('statusFilter').value;
+        const rows = document.querySelectorAll('#demandTable tr');
+        rows.forEach(row => {
+            const status = row.getAttribute('data-status');
+            row.style.display = filter === '' || status === filter ? '' : 'none';
+        });
+    }
+</script>
