@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Hirfa.Web.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
+using Hirfa.Web.Models;
 
 namespace Hirfa.Web.Controllers
 {
@@ -13,7 +14,7 @@ namespace Hirfa.Web.Controllers
         public ClientController(HirfaDbContext context) { _context = context; }
 
         [HttpGet]
-        public IActionResult RegisterClient() => View("~/Views/Client/Register.cshtml");
+        public IActionResult RegisterClient() => View("RegisterClient");
 
         [HttpPost]
         public async Task<IActionResult> RegisterClient(ClientRegisterViewModel clientModel)
@@ -60,13 +61,51 @@ namespace Hirfa.Web.Controllers
             _context.Clients.Add(client);
             await _context.SaveChangesAsync();
             TempData["SuccessToast"] = "Account created successfully. Please log in.";
-            return View("~/Views/Client/Register.cshtml", clientModel);
+            return View("RegisterClient");
         }
 
         [HttpGet]
         public IActionResult ClientDashboard()
         {
             return View("~/Views/Client/Dashboard.cshtml");
+        }
+
+        [HttpGet]
+        public IActionResult CreateDemand()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateDemand(CreateDemandeClientViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var clientId = HttpContext.Session.GetInt32("ClientId");
+            if (clientId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var demande = new Demandeclient
+            {
+                Categorie = model.Categorie,
+                Description = model.Description,
+                Datedebut = DateOnly.FromDateTime(model.Datedebut),
+                Datefin = DateOnly.FromDateTime(model.Datefin),
+                Idclient = clientId.Value,
+                Datedemande = DateOnly.FromDateTime(DateTime.Now),
+                Etat = DemandeclientStatus.Pending
+            };
+
+            _context.Demandeclients.Add(demande);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessToast"] = "Demand created successfully.";
+            return RedirectToAction("ClientDashboard");
         }
     }
 }
