@@ -302,5 +302,44 @@ namespace Hirfa.Web.Controllers
 
             return RedirectToAction("AssignedDemands");
         }
+
+        [HttpPost]
+        public IActionResult ToggleActiveStatus()
+        {
+            var prestataireId = HttpContext.Session.GetInt32("PrestataireId");
+            if (prestataireId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var prestataire = _context.Prestataires.FirstOrDefault(p => p.Idprestataire == prestataireId);
+            if (prestataire != null)
+            {
+                prestataire.Estdisponible = !prestataire.Estdisponible;
+                _context.SaveChanges();
+                HttpContext.Session.SetString("IsActive", prestataire.Estdisponible.ToString());
+
+                if (!prestataire.Estdisponible) // If status is changed to Non Active
+                {
+                    var assignedDemands = _context.Demandeclients.Where(d => d.Idprestataire == prestataireId).ToList();
+                    foreach (var demand in assignedDemands)
+                    {
+                        demand.Etat = DemandeclientStatus.Pending;
+                        demand.Idprestataire = null;
+                    }
+                    _context.SaveChanges();
+                }
+
+                TempData["SuccessToast"] = $"Your status has been changed to {(prestataire.Estdisponible ? "Active" : "Non Active")} successfully.";
+            }
+
+            return RedirectToAction("Dashboard", "Prestataire");
+        }
+
+        [HttpGet]
+        public IActionResult Dashboard()
+        {
+            return RedirectToAction("PrestataireDashboard");
+        }
     }
 }

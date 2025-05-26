@@ -37,16 +37,16 @@ namespace Hirfa.Web.Controllers
             if (_context.Prestataires.Any(p => p.Idcompte == compte.Idcompte))
             {
                 var prestataire = _context.Prestataires.FirstOrDefault(p => p.Idcompte == compte.Idcompte);
-                if (prestataire != null && !prestataire.Estdisponible)
-                {
-                    TempData["ErrorToast"] = "Your account is not yet approved or is inactive.";
-                    return View("~/Views/Account/Login.cshtml");
-                }
                 HttpContext.Session.SetString("UserName", compte.Email);
                 HttpContext.Session.SetString("UserRole", "prestataire");
                 if (prestataire != null)
                 {
                     HttpContext.Session.SetInt32("PrestataireId", prestataire.Idprestataire);
+                    HttpContext.Session.SetString("IsActive", prestataire.Estdisponible.ToString()); // Save Estdisponible in session
+                }
+                else
+                {
+                    HttpContext.Session.SetString("IsActive", "false"); // Default to false if prestataire is null
                 }
                 return RedirectToAction("PrestataireDashboard", "Prestataire");
             }
