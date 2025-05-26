@@ -44,6 +44,10 @@ namespace Hirfa.Web.Controllers
                 }
                 HttpContext.Session.SetString("UserName", compte.Email);
                 HttpContext.Session.SetString("UserRole", "prestataire");
+                if (prestataire != null)
+                {
+                    HttpContext.Session.SetInt32("PrestataireId", prestataire.Idprestataire);
+                }
                 return RedirectToAction("PrestataireDashboard", "Prestataire");
             }
             if (_context.Admins.Any(a => a.Idcompte == compte.Idcompte))

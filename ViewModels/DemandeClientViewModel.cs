@@ -22,4 +22,8 @@ public class DemandeClientViewModel
     public string? ClientAddress { get; set; } // Added property for client address
 
     public int MatchingPrestatairesCount { get; set; } // Added property for matching prestataires count
+
+    public string ClientName { get; set; } = null!;
+
+    public string ClientGender { get; set; } = null!;
 }

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Hirfa.Web.Data;
 using System.Threading.Tasks;
 using Hirfa.Web.ViewModels;
+using Hirfa.Web.Models; // Added missing namespace import
 
 namespace Hirfa.Web.Controllers
 {
@@ -178,6 +179,128 @@ namespace Hirfa.Web.Controllers
             if (demande == null)
                 return NotFound();
             return View("~/Views/Prestataire/DemandDetails.cshtml", demande);
+        }
+
+        [HttpGet]
+        public IActionResult AssignedDemands()
+        {
+            if (HttpContext.Session.GetString("UserRole") != "prestataire")
+            {
+                return Unauthorized();
+            }
+
+            int? prestataireId = HttpContext.Session.GetInt32("PrestataireId");
+            if (prestataireId == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var assignedDemands = _context.Demandeclients
+                .Where(d => d.Idprestataire == prestataireId)
+                .Select(d => new DemandeClientViewModel
+                {
+                    Id = d.Iddemandeclient,
+                    Etat = d.Etat, // Directly assign the DemandeclientStatus
+                    Description = d.Description,
+                    DateDebut = d.Datedebut,
+                    ClientAddress = d.IdclientNavigation.Adresse ?? "N/A"
+                })
+                .ToList();
+
+            return View("AssignedDemands", assignedDemands);
+        }
+
+        [HttpPost]
+        public IActionResult SubmitDevis(DevisViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Fetch the existing Devis entity from the database
+                var devis = _context.Devis.FirstOrDefault(d => d.Iddevis == model.Iddevis);
+                if (devis != null)
+                {
+                    // Update the Devis entity with the submitted data
+                    devis.Montantglobal = model.Montantglobal;
+                    devis.Datelimite = model.Datelimite.HasValue ? DateOnly.FromDateTime(model.Datelimite.Value) : null; // Proper conversion
+                    devis.Etat = "Submitted"; // Update the status to Submitted
+
+                    // Save changes to the database
+                    _context.SaveChanges();
+
+                    TempData["SuccessMessage"] = "Devis submitted successfully.";
+                    return RedirectToAction("AssignedDemands");
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Devis not found.";
+                }
+            }
+
+            TempData["ErrorMessage"] = "Invalid data submitted.";
+            return RedirectToAction("AssignedDemands");
+        }
+
+        [HttpGet]
+        public IActionResult FillDevis(int id)
+        {
+            if (HttpContext.Session.GetString("UserRole") != "prestataire")
+            {
+                return Unauthorized();
+            }
+
+            var devis = _context.Demandeclients
+                .Where(d => d.Iddemandeclient == id)
+                .Select(d => new DevisViewModel
+                {
+                    Iddevis = 0, // Default value for new Devis
+                    Etat = d.Etat.ToString(),
+                    Montantglobal = 0, // Default value
+                    Datelimite = null, // Default value
+                    Avisclient = null, // Default value
+                    Idprestataire = HttpContext.Session.GetInt32("PrestataireId") ?? 0,
+                    Iddemandeclient = d.Iddemandeclient,
+                    Description = "", // Default empty description for the devis
+                    DemandDetails = new DemandeClientViewModel
+                    {
+                        Id = d.Iddemandeclient,
+                        Etat = d.Etat,
+                        Description = d.Description,
+                        DateDebut = d.Datedebut,
+                        ClientAddress = d.IdclientNavigation.Adresse ?? "N/A",
+                        ClientName = d.IdclientNavigation.Prenom + " " + d.IdclientNavigation.Nom,
+                        ClientGender = d.IdclientNavigation.Sexe != null ? d.IdclientNavigation.Sexe.ToString() : "Unknown"
+                    }
+                })
+                .FirstOrDefault();
+
+            if (devis == null)
+            {
+                return NotFound();
+            }
+
+            return View("FillDevis", devis);
+        }
+
+        [HttpPost]
+        public IActionResult RejectDemande(int id)
+        {
+            if (HttpContext.Session.GetString("UserRole") != "prestataire")
+            {
+                return Unauthorized();
+            }
+
+            var demande = _context.Demandeclients.FirstOrDefault(d => d.Iddemandeclient == id);
+            if (demande == null)
+            {
+                return NotFound();
+            }
+
+            demande.Etat = DemandeclientStatus.Pending;
+            demande.Idprestataire = null;
+
+            _context.SaveChanges();
+
+            return RedirectToAction("AssignedDemands");
         }
     }
 }

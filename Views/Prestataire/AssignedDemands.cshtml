@@ -1,0 +1,53 @@
+@model IEnumerable<Hirfa.Web.ViewModels.DemandeClientViewModel>
+
+@{
+    ViewData["Title"] = "Assigned Demands";
+}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Assigned Demands</h1>
+
+    <div class="row">
+        @if (!Model.Any())
+        {
+            <div class="col-12 text-center">
+                <p>No assigned demands found.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var demand in Model)
+            {
+                <div class="col-md-4 mb-4">
+                    <a href="/Prestataire/FillDevis/@demand.Id" class="text-decoration-none">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Demand ID: @demand.Id</h5>
+                                <p class="card-text"><strong>Status:</strong> <span class="badge @GetStatusBadgeClass(demand.Etat.ToString())">@demand.Etat</span></p>
+                                <p class="card-text"><strong>Start Date:</strong> @(demand.DateDebut.HasValue ? demand.DateDebut.Value.ToString("yyyy-MM-dd") : "N/A")</p>
+                                <p class="card-text"><strong>Start Time:</strong> @(demand.DateDebut.HasValue ? demand.DateDebut.Value.ToString("HH:mm") : "N/A")</p>
+                                <p class="card-text"><strong>Location:</strong> @demand.ClientAddress</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@functions {
+    private string GetStatusBadgeClass(string status)
+    {
+        return status switch
+        {
+            "Pending" => "bg-warning text-dark",
+            "Matching" => "bg-info text-dark",
+            "Complete" => "bg-success",
+            "Canceled" => "bg-danger",
+            "NotFound" => "bg-secondary",
+            "WorkOn" => "bg-primary",
+            _ => "bg-light text-dark"
+        };
+    }
+}
