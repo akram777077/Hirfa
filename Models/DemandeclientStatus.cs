@@ -6,6 +6,7 @@ namespace Hirfa.Web.Models
         Matching,    // In progress of matching
         Complete,    // Successfully completed
         Canceled,    // Canceled by client
-        NotFound     // Demand not found
+        NotFound,    // Demand not found
+        WorkOn       // Currently being worked on
     }
 }

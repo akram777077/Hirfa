@@ -234,6 +234,14 @@
                             <a class="nav-link" asp-controller="Client" asp-action="AllDemands">All Demands</a>
                         </li>
                     }
+                    @if (isLoggedIn && userRole == "serviceclient") {
+                        <li class="nav-item">
+                            <a class="nav-link" href="/ServiceClient/ServiceClientDashboard">Dashboard</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/ServiceClient/ClientDemands">Client Demands</a>
+                        </li>
+                    }
                 </ul>
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
                     @if (isLoggedIn) { <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-person-circle me-1"></i> @userName</a><ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown"><li><a class="dropdown-item" asp-controller="Account" asp-action="EditAccount"><i class="bi bi-pencil-square"></i>Edit Account</a></li><li><hr class="dropdown-divider"></li><li><a class="dropdown-item text-danger" asp-controller="Account" asp-action="Logout"><i class="bi bi-box-arrow-right"></i>Logout</a></li></ul></li> }

@@ -1,0 +1,113 @@
+@model IEnumerable<Hirfa.Web.ViewModels.DemandeClientViewModel>
+
+<style>
+    .status-pending {
+        background-color: #f0ad4e; /* Orange */
+        color: white;
+        padding: 5px;
+        border-radius: 3px;
+    }
+    .status-matching {
+        background-color: #5bc0de; /* Blue */
+        color: white;
+        padding: 5px;
+        border-radius: 3px;
+    }
+    .status-complete {
+        background-color: #5cb85c; /* Green */
+        color: white;
+        padding: 5px;
+        border-radius: 3px;
+    }
+    .status-canceled {
+        background-color: #d9534f; /* Red */
+        color: white;
+        padding: 5px;
+        border-radius: 3px;
+    }
+    .status-notfound {
+        background-color: #6c757d; /* Gray */
+        color: white;
+        padding: 5px;
+        border-radius: 3px;
+    }
+    .status-workon {
+        background-color: #ffc107; /* Yellow */
+        color: black;
+        padding: 5px;
+        border-radius: 3px;
+    }
+</style>
+
+<div class="container mt-5">
+    <h2>Client Demands</h2>
+
+    <!-- Filter Dropdown -->
+    <div class="mb-4">
+        <label for="statusFilter" class="form-label">Filter by Status:</label>
+        <select id="statusFilter" class="form-select" onchange="filterDemands()">
+            <option value="">All</option>
+            <option value="Pending">Pending</option>
+            <option value="Matching">Matching</option>
+            <option value="Complete">Complete</option>
+            <option value="Canceled">Canceled</option>
+            <option value="NotFound">Not Found</option>
+            <option value="WorkOn">Work On</option>
+        </select>
+    </div>
+
+    <div class="row" id="demandCards">
+        @foreach (var demand in Model)
+        {
+            <div class="col-md-4 mb-4 demand-card" data-status="@demand.Etat">
+                <div class="card position-relative">
+                    <!-- Badge for number of matching prestataires -->
+                    <span class="badge bg-primary position-absolute top-0 end-0 m-2">
+                        @demand.MatchingPrestatairesCount
+                    </span>
+                    <div class="card-body">
+                        <h5 class="card-title">Demand ID: @demand.Id</h5>
+                        <p class="card-text">Description: @demand.Description</p>
+                        <p class="card-text">Category: @demand.Categorie</p>
+                        <p class="card-text">Date of Demand: @demand.DateDemande.ToString("yyyy-MM-dd HH:mm")</p>
+                        <p class="card-text">Start Date: @demand.DateDebut?.ToString("yyyy-MM-dd HH:mm")</p>
+                        <p class="card-text">End Date: @demand.DateFin?.ToString("yyyy-MM-dd HH:mm")</p>
+                        <p class="card-text">Client Address: @demand.ClientAddress</p>
+                        <p class="card-text">
+                            Status: <span class="@(demand.Etat == Hirfa.Web.Models.DemandeclientStatus.Pending ? "status-pending" : 
+                                                demand.Etat == Hirfa.Web.Models.DemandeclientStatus.Matching ? "status-matching" : 
+                                                demand.Etat == Hirfa.Web.Models.DemandeclientStatus.Complete ? "status-complete" : 
+                                                demand.Etat == Hirfa.Web.Models.DemandeclientStatus.Canceled ? "status-canceled" : 
+                                                demand.Etat == Hirfa.Web.Models.DemandeclientStatus.WorkOn ? "status-workon" : "status-notfound")">
+                                @demand.Etat
+                            </span>
+                        </p>
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="ViewPrestataires" asp-route-id="@demand.Id" class="btn btn-primary" style="display: @(demand.Etat == Hirfa.Web.Models.DemandeclientStatus.Pending ? "inline-block" : "none")">View Prestataires</a>
+                            <form asp-action="RejectDemandeClient" method="post" style="display: @(demand.Etat == Hirfa.Web.Models.DemandeclientStatus.Pending ? "inline-block" : "none")" data-ajax="true" data-ajax-method="POST" data-ajax-update="#demandCards">
+                                <input type="hidden" name="id" value="@demand.Id" />
+                                <button type="submit" class="btn btn-danger">Mark as Not Found</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    function filterDemands() {
+        const filterValue = document.getElementById('statusFilter').value;
+        const cards = document.querySelectorAll('.demand-card');
+
+        cards.forEach(card => {
+            const status = card.getAttribute('data-status');
+            if (!filterValue || status === filterValue) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+</script>

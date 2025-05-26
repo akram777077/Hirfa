@@ -18,4 +18,8 @@ public class DemandeClientViewModel
     public string? Description { get; set; }
 
     public string Categorie { get; set; } = null!;
+
+    public string? ClientAddress { get; set; } // Added property for client address
+
+    public int MatchingPrestatairesCount { get; set; } // Added property for matching prestataires count
 }

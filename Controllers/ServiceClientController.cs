@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Hirfa.Web.ViewModels;
 using System.Linq;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hirfa.Web.Controllers
 {
@@ -90,7 +91,7 @@ namespace Hirfa.Web.Controllers
             demande.Etat = Hirfa.Web.Models.DemandeclientStatus.NotFound;
             _context.SaveChanges();
             TempData["SuccessToast"] = "Demande rejected and status set to NotFound.";
-            return RedirectToAction("ServiceClientDashboard");
+            return RedirectToAction("ClientDemands");
         }
         [HttpPost]
         public IActionResult AcceptDemandePrestataire(int id, string returnUrl)
@@ -119,6 +120,94 @@ namespace Hirfa.Web.Controllers
             if (!string.IsNullOrEmpty(returnUrl))
                 return Redirect(returnUrl);
             return RedirectToAction("PrestataireDemands");
+        }
+
+        [HttpGet]
+        public IActionResult ClientDemands()
+        {
+            var demands = _context.Demandeclients
+                .Include(d => d.IdclientNavigation) // Eagerly load the client navigation property
+                .Select(d => new DemandeClientViewModel
+                {
+                    Id = d.Iddemandeclient,
+                    Description = d.Description,
+                    Categorie = d.Categorie,
+                    DateDemande = d.Datedemande,
+                    DateDebut = d.Datedebut,
+                    DateFin = d.Datefin,
+                    Etat = d.Etat,
+                    ClientAddress = d.IdclientNavigation.Adresse,
+                    MatchingPrestatairesCount = _context.Prestataires.Count(p => p.Typeservice == d.Categorie || p.Typeservice.Contains(d.Categorie))
+                })
+                .ToList();
+
+            return View(demands);
+        }
+
+        [HttpGet]
+        public IActionResult ViewPrestataires(int id)
+        {
+            var demand = _context.Demandeclients.FirstOrDefault(d => d.Iddemandeclient == id);
+            if (demand == null)
+            {
+                return NotFound();
+            }
+
+            var relatedPrestataires = _context.Prestataires
+                .Where(p => p.Typeservice == demand.Categorie || p.Typeservice.Contains(demand.Categorie))
+                .Select(p => new PrestataireViewModel
+                {
+                    Idprestataire = p.Idprestataire,
+                    Nom = p.Nom,
+                    Prenom = p.Prenom,
+                    Numerotelephone = p.Numerotelephone,
+                    Adresse = p.Adresse,
+                    Typeservice = p.Typeservice,
+                    Estdisponible = p.Estdisponible,
+                    Sexe = p.Sexe, // Map gender
+                    Stars = 0, // Placeholder for stars as Evaluation.Stars is not defined
+                    TotalDemands = p.Demandeclients.Count
+                })
+                .ToList();
+
+            ViewBag.DemandId = id;
+            return View("PrestataireList", relatedPrestataires);
+        }
+
+        [HttpPost]
+        public IActionResult MatchPrestataire(int demandId, int prestataireId)
+        {
+            var demand = _context.Demandeclients.FirstOrDefault(d => d.Iddemandeclient == demandId);
+            if (demand == null)
+            {
+                return NotFound();
+            }
+
+            demand.Idprestataire = prestataireId;
+            demand.Etat = Hirfa.Web.Models.DemandeclientStatus.Matching; // Update status to Matching
+            _context.SaveChanges();
+
+            TempData["SuccessToast"] = "Prestataire matched successfully, and status updated to Matching.";
+            return RedirectToAction("ClientDemands");
+        }
+
+        private IEnumerable<DemandeClientViewModel> GetUpdatedDemands()
+        {
+            return _context.Demandeclients
+                .Include(d => d.IdclientNavigation)
+                .Select(d => new DemandeClientViewModel
+                {
+                    Id = d.Iddemandeclient,
+                    Description = d.Description,
+                    Categorie = d.Categorie,
+                    DateDemande = d.Datedemande,
+                    DateDebut = d.Datedebut,
+                    DateFin = d.Datefin,
+                    ClientAddress = d.IdclientNavigation.Adresse,
+                    Etat = d.Etat,
+                    MatchingPrestatairesCount = _context.Prestataires.Count(p => p.Typeservice == d.Categorie)
+                })
+                .ToList();
         }
     }
 }

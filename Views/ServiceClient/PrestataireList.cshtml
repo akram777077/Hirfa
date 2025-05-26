@@ -1,0 +1,39 @@
+@model IEnumerable<Hirfa.Web.ViewModels.PrestataireViewModel>
+
+<div class="container mt-5">
+    <h2>Available Prestataires</h2>
+    <div class="row">
+        @foreach (var prestataire in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@prestataire.Nom @prestataire.Prenom</h5>
+                        <p class="card-text">Service Type: @prestataire.Typeservice</p>
+                        <p class="card-text">Availability: @(prestataire.Estdisponible ? "Available" : "Unavailable")</p>
+                        <p class="card-text">Gender: @(prestataire.Sexe == "M" ? "Male" : prestataire.Sexe == "F" ? "Female" : "Unknown")</p>
+                        <p class="card-text">Stars: 
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                if (i <= prestataire.Stars)
+                                {
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-star text-muted"></i>
+                                }
+                            }
+                        </p>
+                        <p class="card-text">Total Demands: @prestataire.TotalDemands</p>
+                        <form asp-action="MatchPrestataire" asp-controller="ServiceClient" method="post">
+                            <input type="hidden" name="demandId" value="@ViewBag.DemandId" />
+                            <input type="hidden" name="prestataireId" value="@prestataire.Idprestataire" />
+                            <button type="submit" class="btn btn-success">Match</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
