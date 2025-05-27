@@ -20,12 +20,16 @@ namespace Hirfa.Web.ViewModels
 
         // Restored property for devis-specific description
         public string? Description { get; set; }
+
+        // New property for prestataire details
+        public PrestataireViewModel? Prestataire { get; set; }
     }
 
     public class QuantiteMatiereDevisViewModel
     {
         public int Idmatierepremiere { get; set; }
         public string MatierePremiereName { get; set; } = null!;
+        public decimal PrixUnitaire { get; set; }
         public decimal Quantite { get; set; }
     }
 }

@@ -18,19 +18,34 @@
         {
             @foreach (var demand in Model)
             {
-                <div class="col-md-4 mb-4">
-                    <a href="/Prestataire/FillDevis/@demand.Id" class="text-decoration-none">
-                        <div class="card h-100">
+                @if (demand.HasSentDevis)
+                {
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 bg-light">
                             <div class="card-body">
                                 <h5 class="card-title">Demand ID: @demand.Id</h5>
                                 <p class="card-text"><strong>Status:</strong> <span class="badge @GetStatusBadgeClass(demand.Etat.ToString())">@demand.Etat</span></p>
-                                <p class="card-text"><strong>Start Date:</strong> @(demand.DateDebut.HasValue ? demand.DateDebut.Value.ToString("yyyy-MM-dd") : "N/A")</p>
-                                <p class="card-text"><strong>Start Time:</strong> @(demand.DateDebut.HasValue ? demand.DateDebut.Value.ToString("HH:mm") : "N/A")</p>
-                                <p class="card-text"><strong>Location:</strong> @demand.ClientAddress</p>
+                                <p class="card-text">Devis is sent successfully. Please wait for the client's review.</p>
                             </div>
                         </div>
-                    </a>
-                </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-md-4 mb-4">
+                        <a href="/Prestataire/FillDevis/@demand.Id" class="text-decoration-none">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">Demand ID: @demand.Id</h5>
+                                    <p class="card-text"><strong>Status:</strong> <span class="badge @GetStatusBadgeClass(demand.Etat.ToString())">@demand.Etat</span></p>
+                                    <p class="card-text"><strong>Start Date:</strong> @(demand.DateDebut.HasValue ? demand.DateDebut.Value.ToString("yyyy-MM-dd") : "N/A")</p>
+                                    <p class="card-text"><strong>Start Time:</strong> @(demand.DateDebut.HasValue ? demand.DateDebut.Value.ToString("HH:mm") : "N/A")</p>
+                                    <p class="card-text"><strong>Location:</strong> @demand.ClientAddress</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                }
             }
         }
     </div>

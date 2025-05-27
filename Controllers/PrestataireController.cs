@@ -36,8 +36,10 @@ namespace Hirfa.Web.Controllers
                 ModelState.Remove(key);
             try
             {
+                // Log ModelState errors for debugging
                 if (!ModelState.IsValid)
                 {
+
                     if (prestataireModel.Diplomes == null || prestataireModel.Diplomes.Count == 0)
                         prestataireModel.Diplomes = new List<DiplomeDemandeInputModel> { new DiplomeDemandeInputModel() };
                     return View("~/Views/Prestataire/Register.cshtml", prestataireModel);
@@ -213,30 +215,57 @@ namespace Hirfa.Web.Controllers
         [HttpPost]
         public IActionResult SubmitDevis(DevisViewModel model)
         {
-            if (ModelState.IsValid)
+            // Log if the action is hit
+            Console.WriteLine("SubmitDevis action invoked.");
+
+            // Check if ModelState is valid
+
+            // Existing logic...
+            var newDevis = new Devi
             {
-                // Fetch the existing Devis entity from the database
-                var devis = _context.Devis.FirstOrDefault(d => d.Iddevis == model.Iddevis);
-                if (devis != null)
-                {
-                    // Update the Devis entity with the submitted data
-                    devis.Montantglobal = model.Montantglobal;
-                    devis.Datelimite = model.Datelimite.HasValue ? DateOnly.FromDateTime(model.Datelimite.Value) : null; // Proper conversion
-                    devis.Etat = "Submitted"; // Update the status to Submitted
+                Montantglobal = model.Montantglobal,
+                Datelimite = model.Datelimite.HasValue ? DateOnly.FromDateTime(model.Datelimite.Value) : null,
+                Etat = model.Etat,
+                Idprestataire = model.Idprestataire,
+                Iddemandeclient = model.Iddemandeclient,
+                Description = model.Description
+            };
 
-                    // Save changes to the database
-                    _context.SaveChanges();
+            _context.Devis.Add(newDevis);
+            _context.SaveChanges();
 
-                    TempData["SuccessMessage"] = "Devis submitted successfully.";
-                    return RedirectToAction("AssignedDemands");
-                }
-                else
+            if (model.QuantiteMatieres != null)
+            {
+                foreach (var matiere in model.QuantiteMatieres)
                 {
-                    TempData["ErrorMessage"] = "Devis not found.";
+                    var existingMatiere = _context.Matierepremieres.FirstOrDefault(m => m.Idmatierepremiere == matiere.Idmatierepremiere);
+
+                    if (existingMatiere == null)
+                    {
+                        var newMatiere = new Matierepremiere
+                        {
+                            Idmatierepremiere = matiere.Idmatierepremiere,
+                            Nommat = matiere.MatierePremiereName,
+                            Prixmat = matiere.PrixUnitaire
+                        };
+                        _context.Matierepremieres.Add(newMatiere);
+                        _context.SaveChanges();
+                        existingMatiere = newMatiere;
+                    }
+
+                    var newQuantiteMatiere = new Quantitematieredevi
+                    {
+                        Iddevis = newDevis.Iddevis,
+                        Idmatierepremiere = existingMatiere.Idmatierepremiere,
+                        Quantite = matiere.Quantite
+                    };
+                    _context.Quantitematieredevis.Add(newQuantiteMatiere);
                 }
             }
 
-            TempData["ErrorMessage"] = "Invalid data submitted.";
+            _context.SaveChanges();
+
+            TempData["SuccessMessage"] = "Devis created successfully.";
             return RedirectToAction("AssignedDemands");
         }
 

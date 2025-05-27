@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Hirfa.Web.Models;
 
@@ -30,4 +31,6 @@ public partial class Demandeclient
     public virtual Client IdclientNavigation { get; set; } = null!;
 
     public virtual Prestataire? IdprestataireNavigation { get; set; }
+
+    public int? DevisId => Devis.FirstOrDefault()?.Iddevis;
 }

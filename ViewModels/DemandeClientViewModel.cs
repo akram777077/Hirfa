@@ -26,4 +26,14 @@ public class DemandeClientViewModel
     public string ClientName { get; set; } = null!;
 
     public string ClientGender { get; set; } = null!;
+
+    public int? DevisId { get; set; } // Added property for Devis ID
+
+    public DevisViewModel? Devis { get; set; }
+
+    public DateTime Datedebut { get; set; }
+    public DateTime? Datefin { get; set; }
+    public DateTime Datedemande { get; set; }
+
+    public bool HasSentDevis => DevisId.HasValue;
 }

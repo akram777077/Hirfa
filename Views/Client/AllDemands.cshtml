@@ -1,4 +1,5 @@
-@model IEnumerable<Hirfa.Web.Models.Demandeclient>
+@using Hirfa.Web.Models
+@model IEnumerable<Hirfa.Web.ViewModels.DemandeClientViewModel>
 @{
     ViewData["Title"] = "All Demands";
 }
@@ -38,14 +39,60 @@
                     <td>@(demand.Datefin.HasValue ? demand.Datefin.Value.ToString("yyyy-MM-dd HH:mm") : "N/A")</td>
                     <td>@demand.Datedemande.ToString("yyyy-MM-dd HH:mm")</td>
                     <td>
-                        <span class="badge" style="background-color: @(demand.Etat == DemandeclientStatus.Pending ? "#3c569c" : demand.Etat == DemandeclientStatus.Complete ? "green" : "red"); color: white; border-radius: 10px;">
-                            @demand.Etat
-                        </span>
+                        @switch (demand.Etat)
+                        {
+                            case DemandeclientStatus.Pending:
+                                <span class="badge" style="background-color: #3c569c; color: white; border-radius: 10px;">
+                                    Pending
+                                </span>
+                                break;
+                            case DemandeclientStatus.Matching:
+                                <span class="badge" style="background-color: #ffc107; color: black; border-radius: 10px;">
+                                    Matching
+                                </span>
+                                break;
+                            case DemandeclientStatus.Complete:
+                                <span class="badge" style="background-color: green; color: white; border-radius: 10px;">
+                                    Complete
+                                </span>
+                                break;
+                            case DemandeclientStatus.Canceled:
+                                <span class="badge" style="background-color: #dc3545; color: white; border-radius: 10px;">
+                                    Canceled
+                                </span>
+                                break;
+                            case DemandeclientStatus.NotFound:
+                                <span class="badge" style="background-color: #6c757d; color: white; border-radius: 10px;">
+                                    Not Found
+                                </span>
+                                break;
+                            case DemandeclientStatus.WorkOn:
+                                <span class="badge" style="background-color: green; color: white; border-radius: 10px;">
+                                    Work On
+                                </span>
+                                break;
+                            default:
+                                <span class="badge badge-secondary" style="border-radius: 10px;">
+                                    @demand.Etat
+                                </span>
+                                break;
+                        }
                     </td>
                     <td>
                         @if (demand.Etat == DemandeclientStatus.Pending)
                         {
-                            <a asp-action="CancelDemand" asp-route-id="@demand.Iddemandeclient" class="btn btn-danger btn-sm">Cancel</a>
+                            <a asp-action="CancelDemand" asp-route-id="@demand.Id" class="btn btn-danger btn-sm">Cancel</a>
+                        }
+                        else if (demand.Etat == DemandeclientStatus.Matching && demand.Devis?.Etat == "Submitted")
+                        {
+                            <a asp-action="SeeDevis" asp-route-id="@demand.DevisId" class="btn btn-primary btn-sm">See Devis</a>
+                        }
+                        else if (demand.Etat == DemandeclientStatus.WorkOn)
+                        {
+                            <form asp-action="CompleteDemand" asp-controller="Client" method="post" class="d-inline">
+                                <input type="hidden" name="id" value="@demand.Id" />
+                                <button type="submit" class="btn btn-success btn-sm">Complete</button>
+                            </form>
                         }
                     </td>
                 </tr>

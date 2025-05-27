@@ -5,6 +5,7 @@ using Hirfa.Web.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
 using Hirfa.Web.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hirfa.Web.Controllers
 {
@@ -118,8 +119,35 @@ namespace Hirfa.Web.Controllers
             }
 
             var demands = _context.Demandeclients
+                .Include(d => d.Devis) // Ensure Devis collection is eagerly loaded
                 .Where(d => d.Idclient == clientId.Value)
+                .AsEnumerable() // Convert to in-memory collection to handle null propagation
+                .Select(d => new DemandeClientViewModel
+                {
+                    Id = d.Iddemandeclient,
+                    Etat = d.Etat,
+                    Description = d.Description,
+                    Datedebut = d.Datedebut,
+                    Datefin = d.Datefin,
+                    Datedemande = d.Datedemande,
+                    Categorie = d.Categorie,
+                    DevisId = d.Devis.FirstOrDefault()?.Iddevis,
+                    Devis = d.Devis.FirstOrDefault() != null ? new DevisViewModel
+                    {
+                        Iddevis = d.Devis.First().Iddevis,
+                        Etat = d.Devis.First().Etat,
+                        Montantglobal = d.Devis.First().Montantglobal,
+                        Datelimite = d.Devis.First().Datelimite?.ToDateTime(TimeOnly.MinValue),
+                        Description = d.Devis.First().Description
+                    } : null
+                })
                 .ToList();
+
+            var debugDemand = demands.FirstOrDefault(d => d.Id == 8);
+            if (debugDemand != null)
+            {
+                Console.WriteLine($"Debug: Demand ID: {debugDemand.Id}, Devis ID: {debugDemand.DevisId}, Devis Description: {debugDemand.Devis?.Description}");
+            }
 
             return View(demands);
         }
@@ -138,6 +166,98 @@ namespace Hirfa.Web.Controllers
             _context.SaveChanges();
 
             TempData["SuccessToast"] = "Demand canceled successfully.";
+            return RedirectToAction("AllDemands");
+        }
+
+        [HttpGet]
+        public IActionResult SeeDevis(int id)
+        {
+            var devis = _context.Devis
+                .Include(d => d.Quantitematieredevis) // Include materials
+                .Include(d => d.IdprestataireNavigation) // Include prestataire information
+                .Where(d => d.Iddevis == id)
+                .Select(d => new DevisViewModel
+                {
+                    Iddevis = d.Iddevis,
+                    Etat = d.Etat,
+                    Montantglobal = d.Montantglobal,
+                    Datelimite = d.Datelimite.HasValue ? d.Datelimite.Value.ToDateTime(TimeOnly.MinValue) : null,
+                    Description = d.Description,
+                    QuantiteMatieres = d.Quantitematieredevis.Select(q => new QuantiteMatiereDevisViewModel
+                    {
+                        Idmatierepremiere = q.Idmatierepremiere,
+                        MatierePremiereName = q.IdmatierepremiereNavigation.Nommat,
+                        PrixUnitaire = q.IdmatierepremiereNavigation.Prixmat,
+                        Quantite = q.Quantite
+                    }).ToList(),
+                    Prestataire = d.IdprestataireNavigation != null ? new PrestataireViewModel
+                    {
+                        Idprestataire = d.IdprestataireNavigation.Idprestataire,
+                        Nom = d.IdprestataireNavigation.Nom,
+                        Prenom = d.IdprestataireNavigation.Prenom,
+                        Adresse = d.IdprestataireNavigation.Adresse,
+                        Numerotelephone = d.IdprestataireNavigation.Numerotelephone,
+                        HasRejectedDevis = _context.Devis.Any(de => de.Idprestataire == d.IdprestataireNavigation.Idprestataire && de.Iddemandeclient == d.Iddemandeclient && de.Etat == "Rejected")
+                    } : null
+                })
+                .FirstOrDefault();
+
+            if (devis == null)
+            {
+                return NotFound();
+            }
+
+            return View("SeeDevis", devis);
+        }
+
+        [HttpPost]
+        public IActionResult AcceptDevis(int id)
+        {
+            var devis = _context.Devis.Include(d => d.IddemandeclientNavigation).FirstOrDefault(d => d.Iddevis == id);
+            if (devis == null || devis.IddemandeclientNavigation == null)
+            {
+                return NotFound();
+            }
+
+            devis.IddemandeclientNavigation.Etat = DemandeclientStatus.WorkOn;
+            devis.Etat = "Accepted";
+            _context.SaveChanges();
+
+            TempData["SuccessMessage"] = "Devis accepted successfully.";
+            return RedirectToAction("SeeDevis", new { id });
+        }
+
+        [HttpPost]
+        public IActionResult RejectDevis(int id)
+        {
+            var devis = _context.Devis.Include(d => d.IddemandeclientNavigation).FirstOrDefault(d => d.Iddevis == id);
+            if (devis == null || devis.IddemandeclientNavigation == null)
+            {
+                return NotFound();
+            }
+
+            devis.IddemandeclientNavigation.Etat = DemandeclientStatus.Pending;
+            devis.IddemandeclientNavigation.Idprestataire = null; // Set Idprestataire to null
+            devis.Etat = "Rejected";
+            _context.SaveChanges();
+
+            TempData["SuccessMessage"] = "Devis rejected successfully.";
+            return RedirectToAction("SeeDevis", new { id });
+        }
+
+        [HttpPost]
+        public IActionResult CompleteDemand(int id)
+        {
+            var demand = _context.Demandeclients.FirstOrDefault(d => d.Iddemandeclient == id);
+            if (demand == null)
+            {
+                return NotFound();
+            }
+
+            demand.Etat = DemandeclientStatus.Complete;
+            _context.SaveChanges();
+
+            TempData["SuccessMessage"] = "Demand marked as complete successfully.";
             return RedirectToAction("AllDemands");
         }
     }

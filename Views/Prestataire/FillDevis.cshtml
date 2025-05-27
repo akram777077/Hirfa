@@ -61,7 +61,10 @@
                 </div>
                 <div class="card-body">
                     <form method="post" action="/Prestataire/SubmitDevis">
+                        <!-- Ensure all hidden fields are present -->
                         <input type="hidden" name="Iddevis" value="@Model.Iddevis" />
+                        <input type="hidden" name="Idprestataire" value="@Model.Idprestataire" />
+                        <input type="hidden" name="Iddemandeclient" value="@Model.Iddemandeclient" />
 
                         <!-- Datelimite -->
                         <div class="mb-3">
@@ -75,25 +78,26 @@
                             <textarea class="form-control" id="description" name="Description" rows="3" placeholder="Provide a detailed description for the devis...">@Model.Description</textarea>
                         </div>
 
+                        <!-- Make Etat Field Hidden and Set Default Value to 'Submitted' -->
+                        <input type="hidden" id="etat" name="Etat" value="Submitted" />
+
                         <hr class="my-4">
 
-                        <!-- Dynamic Matiere Premiere Section -->
-                        <h6 class="fw-semibold mb-3">Matiere Premiere Details</h6>
                         <div id="matiere-section">
-                            <!-- Initial Matiere Premiere Row -->
+                            <!-- Dynamic Matiere Premiere Section -->
                             <div class="matiere-row p-3 mb-3 border rounded bg-light position-relative">
                                 <div class="row g-3">
                                     <div class="col-md-4">
-                                        <label for="Matieres[0].Nommat" class="form-label">Nom Matiere</label>
-                                        <input type="text" class="form-control" id="Matieres[0].Nommat" name="Matieres[0].Nommat" required />
+                                        <label for="QuantiteMatieres[0].Idmatierepremiere" class="form-label">Nom Matiere</label>
+                                        <input type="text" class="form-control" id="QuantiteMatieres[0].MatierePremiereName" name="QuantiteMatieres[0].MatierePremiereName" required />
                                     </div>
                                     <div class="col-md-4">
-                                        <label for="Matieres[0].Prixmat" class="form-label">Prix Matiere</label>
-                                        <input type="number" step="0.01" class="form-control" id="Matieres[0].Prixmat" name="Matieres[0].Prixmat" required />
+                                        <label for="QuantiteMatieres[0].PrixUnitaire" class="form-label">Prix Matiere</label>
+                                        <input type="number" step="0.01" class="form-control" id="QuantiteMatieres[0].PrixUnitaire" name="QuantiteMatieres[0].PrixUnitaire" required />
                                     </div>
                                     <div class="col-md-4">
-                                        <label for="Matieres[0].Quantite" class="form-label">Quantite</label>
-                                        <input type="number" class="form-control" id="Matieres[0].Quantite" name="Matieres[0].Quantite" required />
+                                        <label for="QuantiteMatieres[0].Quantite" class="form-label">Quantite</label>
+                                        <input type="number" class="form-control" id="QuantiteMatieres[0].Quantite" name="QuantiteMatieres[0].Quantite" required />
                                     </div>
                                 </div>
                                 <button type="button" class="btn-close position-absolute top-0 end-0 mt-2 me-2 remove-matiere" aria-label="Close"></button>
@@ -104,11 +108,18 @@
                             <i class="bi bi-plus-circle me-2"></i>Add Another Matiere
                         </button>
 
-                        <!-- Total Prix Matiere Premiere -->
+                        <!-- Add Prix of Work Field -->
+                        <div class="mb-3">
+                            <label for="prix-of-work" class="form-label fw-semibold">Prix of Work</label>
+                            <input type="number" step="0.01" class="form-control" id="prix-of-work" name="PrixOfWork" placeholder="Enter the price of work..." required />
+                        </div>
+
+                        <!-- Total Prix Section -->
                         <div class="d-flex justify-content-between align-items-center mt-4">
-                            <h6 class="fw-semibold">Total Prix Matiere Premiere:</h6>
+                            <h6 class="fw-semibold">Total Prix:</h6>
                             <span id="total-prix" class="fw-bold">0.00</span>
                         </div>
+                        <input type="hidden" id="Montantglobal" name="Montantglobal" value="0" />
 
                         <!-- Action Buttons -->
                         <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
@@ -133,16 +144,16 @@
             newRow.innerHTML =
                 `<div class="row g-3">
                     <div class="col-md-4">
-                        <label for="Matieres[${matiereIndex}].Nommat" class="form-label">Nom Matiere</label>
-                        <input type="text" class="form-control" id="Matieres[${matiereIndex}].Nommat" name="Matieres[${matiereIndex}].Nommat" required />
+                        <label for="QuantiteMatieres[${matiereIndex}].MatierePremiereName" class="form-label">Nom Matiere</label>
+                        <input type="text" class="form-control" id="QuantiteMatieres[${matiereIndex}].MatierePremiereName" name="QuantiteMatieres[${matiereIndex}].MatierePremiereName" required />
                     </div>
                     <div class="col-md-4">
-                        <label for="Matieres[${matiereIndex}].Prixmat" class="form-label">Prix Matiere</label>
-                        <input type="number" step="0.01" class="form-control" id="Matieres[${matiereIndex}].Prixmat" name="Matieres[${matiereIndex}].Prixmat" required />
+                        <label for="QuantiteMatieres[${matiereIndex}].PrixUnitaire" class="form-label">Prix Matiere</label>
+                        <input type="number" step="0.01" class="form-control" id="QuantiteMatieres[${matiereIndex}].PrixUnitaire" name="QuantiteMatieres[${matiereIndex}].PrixUnitaire" required />
                     </div>
                     <div class="col-md-4">
-                        <label for="Matieres[${matiereIndex}].Quantite" class="form-label">Quantite</label>
-                        <input type="number" class="form-control" id="Matieres[${matiereIndex}].Quantite" name="Matieres[${matiereIndex}].Quantite" required />
+                        <label for="QuantiteMatieres[${matiereIndex}].Quantite" class="form-label">Quantite</label>
+                        <input type="number" class="form-control" id="QuantiteMatieres[${matiereIndex}].Quantite" name="QuantiteMatieres[${matiereIndex}].Quantite" required />
                     </div>
                 </div>
                 <button type="button" class="btn-close position-absolute top-0 end-0 mt-2 me-2 remove-matiere" aria-label="Close"></button>`;
@@ -153,15 +164,19 @@
         function calculateTotalPrix() {
             let total = 0;
             document.querySelectorAll('#matiere-section .matiere-row').forEach(row => {
-                const prix = parseFloat(row.querySelector('[name$=".Prixmat"]').value) || 0;
+                const prix = parseFloat(row.querySelector('[name$=".PrixUnitaire"]').value) || 0;
                 const quantite = parseFloat(row.querySelector('[name$=".Quantite"]').value) || 0;
                 total += prix * quantite;
             });
+            const prixOfWork = parseFloat(document.getElementById('prix-of-work').value) || 0;
+            total += prixOfWork;
             document.getElementById('total-prix').textContent = total.toFixed(2);
+            document.getElementById('Montantglobal').value = total.toFixed(2);
         }
 
         document.getElementById('matiere-section').addEventListener('input', calculateTotalPrix);
         document.getElementById('add-matiere').addEventListener('click', calculateTotalPrix);
+        document.getElementById('prix-of-work').addEventListener('input', calculateTotalPrix);
 
         document.getElementById('matiere-section').addEventListener('click', function(event) {
             if (event.target.classList.contains('remove-matiere')) {

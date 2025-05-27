@@ -21,4 +21,6 @@ public class PrestataireViewModel
     public int Stars { get; set; }
 
     public int TotalDemands { get; set; }
+
+    public bool HasRejectedDevis { get; set; }
 }

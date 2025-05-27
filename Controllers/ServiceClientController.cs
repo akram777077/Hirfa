@@ -166,7 +166,8 @@ namespace Hirfa.Web.Controllers
                     Estdisponible = p.Estdisponible,
                     Sexe = p.Sexe, // Map gender
                     Stars = 0, // Placeholder for stars as Evaluation.Stars is not defined
-                    TotalDemands = p.Demandeclients.Count
+                    TotalDemands = p.Demandeclients.Count,
+                    HasRejectedDevis = _context.Devis.Any(de => de.Idprestataire == p.Idprestataire && de.Iddemandeclient == demand.Iddemandeclient && de.Etat == "Rejected") // Check for rejected devis
                 })
                 .ToList();
 

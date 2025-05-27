@@ -1,0 +1,77 @@
+@model Hirfa.Web.ViewModels.DevisViewModel
+
+@{
+    ViewData["Title"] = "Devis Details";
+}
+
+<div class="container mt-5">
+    <h1 class="text-center">Devis Details</h1>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5>Devis ID: @Model.Iddevis</h5>
+        </div>
+        <div class="card-body">
+            <p><strong>Status:</strong> @Model.Etat</p>
+            <p><strong>Total Amount:</strong> @Model.Montantglobal.ToString("C")</p>
+            <p><strong>Deadline:</strong> @(Model.Datelimite.HasValue ? Model.Datelimite.Value.ToString("yyyy-MM-dd") : "N/A")</p>
+            <p><strong>Description:</strong> @Model.Description</p>
+
+            <h5 class="mt-4">Prestataire Information</h5>
+            @if (Model.Prestataire != null)
+            {
+                <p><strong>Name:</strong> @Model.Prestataire.Prenom @Model.Prestataire.Nom</p>
+                <p><strong>Address:</strong> @Model.Prestataire.Adresse</p>
+                <p><strong>Phone:</strong> @Model.Prestataire.Numerotelephone</p>
+            }
+            else
+            {
+                <p>No prestataire information available.</p>
+            }
+
+            <h5 class="mt-4">Materials</h5>
+            @if (Model.QuantiteMatieres.Any())
+            {
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Unit Price</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var material in Model.QuantiteMatieres)
+                        {
+                            <tr>
+                                <td>@material.MatierePremiereName</td>
+                                <td>@material.PrixUnitaire.ToString("C")</td>
+                                <td>@material.Quantite</td>
+                                <td>@(material.PrixUnitaire * material.Quantite).ToString("C")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p>No materials information available.</p>
+            }
+
+            <p><strong>Total Prix Materials:</strong> @Model.QuantiteMatieres.Sum(m => m.PrixUnitaire * m.Quantite).ToString("C")</p>
+            <p><strong>Prestataire Work:</strong> @(Model.Montantglobal - Model.QuantiteMatieres.Sum(m => m.PrixUnitaire * m.Quantite)).ToString("C")</p>
+
+            <div class="mt-4">
+                <form asp-action="AcceptDevis" asp-controller="Client" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@Model.Iddevis" />
+                    <button type="submit" class="btn btn-success">Accept Devis</button>
+                </form>
+                <form asp-action="RejectDevis" asp-controller="Client" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@Model.Iddevis" />
+                    <button type="submit" class="btn btn-danger">Reject Devis</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

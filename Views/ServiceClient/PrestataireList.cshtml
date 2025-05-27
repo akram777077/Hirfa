@@ -29,7 +29,7 @@
                         <form asp-action="MatchPrestataire" asp-controller="ServiceClient" method="post">
                             <input type="hidden" name="demandId" value="@ViewBag.DemandId" />
                             <input type="hidden" name="prestataireId" value="@prestataire.Idprestataire" />
-                            <button type="submit" class="btn btn-success">Match</button>
+                            <button type="submit" class="btn btn-success" @(prestataire.HasRejectedDevis ? "disabled" : "")>Match</button>
                         </form>
                     </div>
                 </div>
