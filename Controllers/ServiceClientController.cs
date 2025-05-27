@@ -137,7 +137,7 @@ namespace Hirfa.Web.Controllers
                     DateFin = d.Datefin,
                     Etat = d.Etat,
                     ClientAddress = d.IdclientNavigation.Adresse,
-                    MatchingPrestatairesCount = _context.Prestataires.Count(p => p.Typeservice == d.Categorie || p.Typeservice.Contains(d.Categorie))
+                    MatchingPrestatairesCount = _context.Prestataires.Count(p => (p.Typeservice == d.Categorie || p.Typeservice.Contains(d.Categorie)) && p.Estdisponible) // Ensure only available Prestataires are counted
                 })
                 .ToList();
 
@@ -154,7 +154,7 @@ namespace Hirfa.Web.Controllers
             }
 
             var relatedPrestataires = _context.Prestataires
-                .Where(p => p.Typeservice == demand.Categorie || p.Typeservice.Contains(demand.Categorie))
+                .Where(p => (p.Typeservice == demand.Categorie || p.Typeservice.Contains(demand.Categorie)) && p.Estdisponible)
                 .Select(p => new PrestataireViewModel
                 {
                     Idprestataire = p.Idprestataire,
